@@ -2,21 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 
 const DEFAULT_STORES = [
-  { id: 'a1111111-1111-1111-1111-111111111111', name: 'Shree Balaji Sweets & Chaat', category: 'Sweets & Snacks', delivery_time: '15-20 min', rating: 4.8 },
-  { id: 'b2222222-2222-2222-2222-222222222222', name: 'Kisan Kirana & Daily Dairy', category: 'Kirana & Milk', delivery_time: '15-25 min', rating: 4.9 }
+  { id: 'store-1', name: 'Shree Balaji Sweets & Chaat', category: 'Sweets & Snacks', delivery_time: '15-20 min', rating: 4.8 },
+  { id: 'store-2', name: 'Kisan Kirana & Daily Dairy', category: 'Kirana & Milk', delivery_time: '15-25 min', rating: 4.9 }
 ];
 
 const DEFAULT_PRODUCTS = [
-  { id: 'p1', store_id: 'a1111111-1111-1111-1111-111111111111', name: 'Desi Ghee Jalebi & Rabri', price: 80, description: 'Garma-garam kurkuri jalebi with malai rabri' },
-  { id: 'p2', store_id: 'a1111111-1111-1111-1111-111111111111', name: 'Samosa Chatni (2 Pcs)', price: 30, description: 'Aloo matar special with meethi chatni' },
-  { id: 'p3', store_id: 'a1111111-1111-1111-1111-111111111111', name: 'Chole Bhature Special', price: 90, description: 'Amritsari style paneer wale bhature' },
-  { id: 'p4', store_id: 'b2222222-2222-2222-2222-222222222222', name: 'Fresh Cow Milk (1 Litre)', price: 65, description: 'Sudh taaza doodh roz subah' },
-  { id: 'p5', store_id: 'b2222222-2222-2222-2222-222222222222', name: 'Fortune Chakki Fresh Atta (5kg)', price: 210, description: '100% Shudh Sharbati Gehu' },
-  { id: 'p6', store_id: 'b2222222-2222-2222-2222-222222222222', name: 'Amul Butter (100g)', price: 58, description: 'Pasteurized table butter' }
+  { id: 'p1', store_id: 'store-1', name: 'Desi Ghee Jalebi & Rabri', price: 80, description: 'Garma-garam kurkuri jalebi with malai rabri' },
+  { id: 'p2', store_id: 'store-1', name: 'Samosa Chatni (2 Pcs)', price: 30, description: 'Aloo matar special with meethi chatni' },
+  { id: 'p3', store_id: 'store-1', name: 'Chole Bhature Special', price: 90, description: 'Amritsari style paneer wale bhature' },
+  { id: 'p4', store_id: 'store-2', name: 'Fresh Cow Milk (1 Litre)', price: 65, description: 'Sudh taaza doodh roz subah' },
+  { id: 'p5', store_id: 'store-2', name: 'Fortune Chakki Fresh Atta (5kg)', price: 210, description: '100% Shudh Sharbati Gehu' },
+  { id: 'p6', store_id: 'store-2', name: 'Amul Butter (100g)', price: 58, description: 'Pasteurized table butter' }
 ];
 
 export default function App() {
-  const [view, setView] = useState('customer');
+  const [view, setView] = useState('customer'); // 'customer', 'dukaan', 'rider'
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [cart, setCart] = useState([]);
@@ -37,21 +37,16 @@ export default function App() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { data: stData } = await supabase.from('stores').select('*');
-        if (stData && stData.length > 0) setStores(stData);
-
-        const { data: prData } = await supabase.from('products').select('*');
-        if (prData && prData.length > 0) setProducts(prData);
-
         const { data: ordData } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
         if (ordData) setOrders(ordData);
       } catch (err) {
-        console.warn('Live DB sync notice:', err);
+        console.warn('DB connect notice:', err);
       }
     };
 
     loadData();
 
+    // Live Real-Time Subscription
     const channel = supabase
       .channel('realtime_orders')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
@@ -105,7 +100,7 @@ export default function App() {
     try {
       await supabase.from('orders').insert([newOrder]);
     } catch (e) {
-      console.warn('DB Insert:', e);
+      console.warn('Order sync:', e);
     }
 
     setOrders((prev) => [{ id: Date.now().toString(), ...newOrder, created_at: new Date().toISOString() }, ...prev]);
