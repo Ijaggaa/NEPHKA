@@ -69,17 +69,16 @@ const DEFAULT_PRODUCTS = [
   }
 ];
 
-// ==========================================
-// CONFIGURATION (Yahan apna asli UPI ID daalein)
-// ==========================================
-const ADMIN_UPI_ID = 'nephka@upi'; // Apna PhonePe / GPay UPI ID yahan daal sakte hain
-const STORE_SUPPORT_PHONE = '919999999999';
-
 export default function App() {
   const [currentView, setCurrentView] = useState('customer'); // 'customer', 'dukaan', 'admin', 'rider', 'poster'
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
+
+  // Config State (Admin Managed)
+  const [upiId, setUpiId] = useState(() => localStorage.getItem('nephka_upi') || 'nephka@upi');
+  const [supportPhone, setSupportPhone] = useState(() => localStorage.getItem('nephka_phone') || '919999999999');
+  const [savedUpiMsg, setSavedUpiMsg] = useState(false);
 
   // PWA & Siren State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -112,19 +111,15 @@ export default function App() {
   const [newStoreTime, setNewStoreTime] = useState('15-20 min');
   const [newStoreRating, setNewStoreRating] = useState('4.8');
 
-  // ==========================================
-  // PRICING & DELIVERY FEE LOGIC
-  // ==========================================
+  // PRICING CALCULATION
   const itemTotal = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
   const totalCartCount = cart.reduce((acc, i) => acc + i.qty, 0);
   const totalSavings = cart.reduce((acc, i) => acc + ((i.mrp || i.price) - i.price) * i.qty, 0);
-  
-  // Delivery Fee: ₹20 if under ₹149, else FREE (₹0)
   const deliveryFee = itemTotal === 0 || itemTotal >= 149 ? 0 : 20;
   const platformFee = itemTotal > 0 ? 3 : 0;
   const finalTotalAmount = itemTotal + deliveryFee + platformFee;
 
-  const upiUrl = `upi://pay?pa=${ADMIN_UPI_ID}&pn=NEPHKA&am=${finalTotalAmount}&cu=INR&tn=QuickOrder`;
+  const upiUrl = `upi://pay?pa=${upiId}&pn=NEPHKA&am=${finalTotalAmount}&cu=INR&tn=QuickOrder`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiUrl)}`;
   const websiteQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent('https://nephka.com')}`;
 
@@ -279,8 +274,24 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
     );
   };
 
+  // SINGLE-STORE CART RESTRICTION (Blinkit Standard)
   const addToCart = (product) => {
     if (product.in_stock === false) return;
+
+    if (cart.length > 0 && cart[0].store_id !== product.store_id) {
+      const currentStore = stores.find((s) => s.id === cart[0].store_id)?.name || 'Dusri Dukaan';
+      const newStore = stores.find((s) => s.id === product.store_id)?.name || 'Nayi Dukaan';
+
+      const confirmChange = window.confirm(
+        `Aapki cart mein pehle se "${currentStore}" ke items hain!\n\nEk time par sirf ek dukaan se order ho sakta hai.\n\nKya aap cart clear karke "${newStore}" se shuru karna chahte hain?`
+      );
+
+      if (confirmChange) {
+        setCart([{ ...product, qty: 1 }]);
+      }
+      return;
+    }
+
     setCart((prev) => {
       const ex = prev.find((i) => i.id === product.id);
       return ex ? prev.map((i) => (i.id === product.id ? { ...i, qty: i.qty + 1 } : i)) : [...prev, { ...product, qty: 1 }];
@@ -298,6 +309,7 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
     setIsSubmitting(true);
     const orderObj = {
       id: 'ord_' + Date.now(),
+      store_id: cart[0]?.store_id || 'store-1',
       customer_name: customerName,
       customer_phone: customerPhone,
       address,
@@ -346,6 +358,14 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
     alert(`🎉 "${newStore.name}" dukaan live onboard ho gayi!`);
   };
 
+  const saveAdminSettings = (e) => {
+    e.preventDefault();
+    localStorage.setItem('nephka_upi', upiId);
+    localStorage.setItem('nephka_phone', supportPhone);
+    setSavedUpiMsg(true);
+    setTimeout(() => setSavedUpiMsg(false), 3000);
+  };
+
   const currentOrder = orders.find((o) => o.id === activeOrderId);
   const step = currentOrder?.status === 'delivered' ? 4 : currentOrder?.status === 'out_for_delivery' ? 3 : currentOrder?.status === 'accepted' ? 2 : 1;
   const totalRevenue = orders.reduce((acc, o) => acc + Number(o.total_amount || 0), 0);
@@ -366,7 +386,7 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
               onClick={() => window.print()}
               className="text-xs font-black bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl shadow-md flex items-center gap-1.5"
             >
-              🖨️ Print Poster (A4)
+              🖨️️ Print Poster (A4)
             </button>
           </div>
 
@@ -559,7 +579,6 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
             </footer>
           </main>
 
-          {/* Floating Cart Bar */}
           {cart.length > 0 && !showCheckout && (
             <div className="fixed bottom-3 left-0 right-0 z-40 px-4">
               <div onClick={() => setShowCheckout(true)} className="max-w-md mx-auto bg-emerald-600 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500">
@@ -579,7 +598,6 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
             </div>
           )}
 
-          {/* Checkout Slide-Up with Delivery & Platform Fee Breakdown */}
           {showCheckout && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-end justify-center">
               <div className="bg-white rounded-t-3xl max-w-md w-full p-4 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
@@ -591,7 +609,6 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
                   <button onClick={() => setShowCheckout(false)} className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">✕</button>
                 </div>
 
-                {/* Detailed Bill Summary */}
                 <div className="bg-slate-50 p-3.5 rounded-2xl border space-y-2 text-xs">
                   {cart.map((item) => (
                     <div key={item.id} className="flex justify-between text-slate-700 font-medium">
@@ -645,6 +662,7 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
                   {paymentMethod === 'upi' && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center space-y-2">
                       <p className="text-xs font-black text-emerald-800">Scan & Pay ₹{finalTotalAmount}</p>
+                      <p className="text-[10px] text-slate-500 font-semibold">UPI ID: {upiId}</p>
                       <img src={qrCodeUrl} alt="QR" className="w-32 h-32 mx-auto border rounded-xl" />
                       <a href={upiUrl} className="block w-full py-2 bg-emerald-600 text-white font-black rounded-xl text-xs">📱 GPay / PhonePe App</a>
                       <input type="text" placeholder="UTR Number (Optional)" value={utrNumber} onChange={(e) => setUtrNumber(e.target.value)} className="w-full p-2 rounded-lg border bg-white text-center text-xs" />
@@ -691,8 +709,8 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-1 text-xs font-bold">
-                <a href={`tel:${STORE_SUPPORT_PHONE}`} className="py-2.5 bg-slate-100 text-slate-800 rounded-xl text-center">📞 Store</a>
-                <a href={`tel:${STORE_SUPPORT_PHONE}`} className="py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-center">🛵 Rider</a>
+                <a href={`tel:${supportPhone}`} className="py-2.5 bg-slate-100 text-slate-800 rounded-xl text-center">📞 Store</a>
+                <a href={`tel:${supportPhone}`} className="py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-center">🛵 Rider</a>
               </div>
             </div>
           )}
@@ -831,7 +849,7 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
       )}
 
       {/* ======================================================== */}
-      {/* 3. MASTER ADMIN VIEW                                     */}
+      {/* 3. MASTER ADMIN VIEW (Store Onboarding & Settings)       */}
       {/* ======================================================== */}
       {currentView === 'admin' && (
         <div className="min-h-screen bg-slate-950 text-white p-4 max-w-md mx-auto space-y-4">
@@ -859,6 +877,45 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
               <p className="text-[11px] text-slate-400">Total Orders</p>
               <p className="text-2xl font-black text-orange-400 mt-1">{orders.length}</p>
             </div>
+          </div>
+
+          {/* ADMIN PAYMENT & CONTACT SETTINGS */}
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3">
+            <h3 className="font-black text-xs uppercase tracking-wider text-emerald-400">⚙️ Live Business & UPI Settings</h3>
+            <form onSubmit={saveAdminSettings} className="space-y-2.5 text-xs">
+              <div>
+                <label className="text-slate-400 block mb-1">Aapka UPI ID (PhonePe/GPay):</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. mobile@ybl / name@oksbi"
+                  value={upiId}
+                  onChange={(e) => setUpiId(e.target.value)}
+                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white outline-none font-bold text-emerald-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Store / Rider Support Phone (WhatsApp):</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. 919876543210"
+                  value={supportPhone}
+                  onChange={(e) => setSupportPhone(e.target.value)}
+                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white outline-none font-bold"
+                />
+              </div>
+
+              {savedUpiMsg && <p className="text-emerald-400 text-xs font-bold text-center">✓ Details Saved Successfully!</p>}
+
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs shadow-md transition"
+              >
+                Save Settings
+              </button>
+            </form>
           </div>
 
           {/* STORE ONBOARDING FORM */}
