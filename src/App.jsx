@@ -15,22 +15,23 @@ const DEFAULT_PRODUCTS = [
   { id: 'p6', store_id: 'store-2', name: 'Amul Butter (100g)', price: 58, description: 'Pasteurized table butter', in_stock: true }
 ];
 
-// Aapka UPI ID jahan payment aayegi (ise baad mein kabhi bhi badal sakte hain)
 const ADMIN_UPI_ID = 'nephka@upi';
 
 export default function App() {
-  const [view, setView] = useState('customer'); // 'customer', 'dukaan', 'rider'
-  const [dukaanTab, setDukaanTab] = useState('orders'); // 'orders', 'inventory'
+  const [view, setView] = useState('customer');
+  const [dukaanTab, setDukaanTab] = useState('orders');
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   
-  // Checkout Form States
+  // Checkout & GPS States
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'upi'
+  const [coords, setCoords] = useState(null); // { lat, lng }
+  const [isLocating, setIsLocating] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('cod');
   const [utrNumber, setUtrNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('All');
@@ -56,7 +57,7 @@ export default function App() {
         const { data: ordData } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
         if (ordData) setOrders(ordData);
       } catch (err) {
-        console.warn('DB connect notice:', err);
+        console.warn('DB notice:', err);
       }
     };
 
@@ -79,6 +80,41 @@ export default function App() {
     };
   }, []);
 
+  // 1-TAP GPS AUTO LOCATION FETCHER
+  const detectLiveLocation = () => {
+    if (!navigator.geolocation) {
+      return alert('Aapke browser mein GPS location support nahi hai.');
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCoords({ lat, lng });
+
+        try {
+          // Free reverse geocoding via OpenStreetMap
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            setAddress(data.display_name);
+          } else {
+            setAddress(`GPS Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+          }
+        } catch (e) {
+          setAddress(`GPS Pin: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+        }
+        setIsLocating(false);
+      },
+      (error) => {
+        setIsLocating(false);
+        alert('Location access enable karein ya address manually type karein.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const addToCart = (product) => {
     if (product.in_stock === false) return;
     setCart((prev) => {
@@ -98,7 +134,6 @@ export default function App() {
 
   const totalCartAmount = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
 
-  // Dynamic UPI Link & QR Code
   const upiUrl = `upi://pay?pa=${ADMIN_UPI_ID}&pn=NEPHKA%20Delivery&am=${totalCartAmount}&cu=INR&tn=Order%20Payment`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
 
@@ -112,6 +147,8 @@ export default function App() {
       customer_name: customerName,
       customer_phone: customerPhone,
       address: address,
+      lat: coords?.lat || null,
+      lng: coords?.lng || null,
       items: cart,
       total_amount: totalCartAmount,
       status: 'placed',
@@ -183,7 +220,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
-      {/* Top Header */}
       <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <div>
@@ -207,7 +243,6 @@ export default function App() {
             <p className="text-xs opacity-90">Mithai, Samosa, Kirana ya Dawa — 20 min mein ghar pe.</p>
           </div>
 
-          {/* Categories */}
           <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-semibold">
             {['All', 'Sweets & Snacks', 'Kirana & Milk'].map((cat) => (
               <button
@@ -220,7 +255,6 @@ export default function App() {
             ))}
           </div>
 
-          {/* Stores & Products */}
           <div className="space-y-4">
             {stores
               .filter((st) => activeTab === 'All' || st.category === activeTab)
@@ -273,7 +307,7 @@ export default function App() {
               ))}
           </div>
 
-          {/* Cart & Checkout with UPI */}
+          {/* Cart & GPS Checkout */}
           {cart.length > 0 && (
             <div className="bg-white rounded-2xl p-4 shadow-xl border border-orange-100 space-y-4">
               <h3 className="font-bold text-sm text-slate-800 border-b pb-2">Delivery Details & Bill (₹{totalCartAmount})</h3>
@@ -295,17 +329,37 @@ export default function App() {
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-orange-500 outline-none"
                 />
-                <textarea
-                  placeholder="Ghar / Dukaan ka Poora Address"
-                  required
-                  rows={2}
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-orange-500 outline-none"
-                />
+                
+                {/* 1-TAP GPS LOCATION BUTTON */}
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="font-semibold text-slate-700">Delivery Address:</label>
+                    <button
+                      type="button"
+                      onClick={detectLiveLocation}
+                      disabled={isLocating}
+                      className="text-[11px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-1 rounded-md flex items-center gap-1 active:scale-95 transition"
+                    >
+                      {isLocating ? '⏳ GPS Fetching...' : '📍 Use Current Location'}
+                    </button>
+                  </div>
+                  <textarea
+                    placeholder="Ghar / Dukaan ka Poora Address (ya GPS button dabayein)"
+                    required
+                    rows={2}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-orange-500 outline-none"
+                  />
+                  {coords && (
+                    <p className="text-[10px] text-emerald-600 font-semibold">
+                      ✓ Accurate GPS Pin Locked ({coords.lat.toFixed(4)}, {coords.lng.toFixed(4)})
+                    </p>
+                  )}
+                </div>
 
-                {/* PAYMENT MODE SELECTOR */}
-                <div className="pt-2">
+                {/* PAYMENT SELECTOR */}
+                <div className="pt-1">
                   <p className="font-bold text-slate-700 mb-2">Payment Mode Chunein:</p>
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -333,7 +387,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* UPI DETAILS & DYNAMIC QR */}
                 {paymentMethod === 'upi' && (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center space-y-2">
                     <p className="text-xs font-bold text-emerald-800">Scan & Pay ₹{totalCartAmount}</p>
@@ -532,7 +585,7 @@ export default function App() {
         <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
           <div className="bg-emerald-900 text-white p-4 rounded-2xl">
             <h2 className="font-bold text-lg">🛵 Rider Delivery Panel</h2>
-            <p className="text-xs text-emerald-200">Live Delivery Tasks & Google Maps Direct</p>
+            <p className="text-xs text-emerald-200">Live Delivery Tasks & Exact GPS Pin Navigation</p>
           </div>
 
           <div className="space-y-3">
@@ -541,50 +594,56 @@ export default function App() {
             ) : (
               orders
                 .filter((o) => o.status !== 'delivered')
-                .map((ord) => (
-                  <div key={ord.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-bold text-sm">{ord.customer_name}</h4>
-                        <p className="text-xs text-slate-500">📞 {ord.customer_phone}</p>
-                      </div>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700 uppercase">{ord.status}</span>
-                    </div>
+                .map((ord) => {
+                  // Direct Accurate GPS link if available, otherwise search query
+                  const mapLink = ord.lat && ord.lng
+                    ? `https://www.google.com/maps/dir/?api=1&destination=${ord.lat},${ord.lng}`
+                    : `https://maps.google.com/?q=${encodeURIComponent(ord.address)}`;
 
-                    <div className="bg-slate-50 p-2 rounded-lg text-xs space-y-1">
-                      <p className="font-semibold text-slate-700">Drop Address:</p>
-                      <p className="text-slate-600">{ord.address}</p>
-                      
-                      {/* PAYMENT STATUS BADGE FOR RIDER */}
-                      <div className="mt-2 pt-2 border-t flex justify-between items-center">
-                        <span className="font-bold text-slate-600">Payment Status:</span>
-                        {ord.payment_method?.includes('UPI') ? (
-                          <span className="px-2 py-1 rounded bg-emerald-100 text-emerald-800 font-extrabold text-xs">
-                            ✅ ONLINE PAID (₹0 Collect)
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 rounded bg-amber-100 text-amber-900 font-extrabold text-xs">
-                            💵 CASH COLLECT: ₹{ord.total_amount}
-                          </span>
-                        )}
+                  return (
+                    <div key={ord.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-bold text-sm">{ord.customer_name}</h4>
+                          <p className="text-xs text-slate-500">📞 {ord.customer_phone}</p>
+                        </div>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700 uppercase">{ord.status}</span>
+                      </div>
+
+                      <div className="bg-slate-50 p-2 rounded-lg text-xs space-y-1">
+                        <p className="font-semibold text-slate-700">Drop Address:</p>
+                        <p className="text-slate-600">{ord.address}</p>
+                        
+                        <div className="mt-2 pt-2 border-t flex justify-between items-center">
+                          <span className="font-bold text-slate-600">Payment Status:</span>
+                          {ord.payment_method?.includes('UPI') ? (
+                            <span className="px-2 py-1 rounded bg-emerald-100 text-emerald-800 font-extrabold text-xs">
+                              ✅ ONLINE PAID (₹0 Collect)
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 rounded bg-amber-100 text-amber-900 font-extrabold text-xs">
+                              💵 CASH COLLECT: ₹{ord.total_amount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <a
+                          href={mapLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-center py-2 bg-blue-50 border border-blue-200 text-blue-700 font-bold rounded-lg text-xs flex items-center justify-center gap-1 hover:bg-blue-100 transition"
+                        >
+                          📍 Direct GPS Route
+                        </a>
+                        <button onClick={() => updateOrderStatus(ord.id, 'delivered')} className="py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs">
+                          ✅ Mark Delivered
+                        </button>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <a
-                        href={`https://maps.google.com/?q=${encodeURIComponent(ord.address)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs"
-                      >
-                        📍 Map Navigation
-                      </a>
-                      <button onClick={() => updateOrderStatus(ord.id, 'delivered')} className="py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs">
-                        ✅ Mark Delivered
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
             )}
           </div>
         </main>
