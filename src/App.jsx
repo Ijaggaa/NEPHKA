@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './supabase';
 
 const DEFAULT_STORES = [
@@ -77,9 +77,13 @@ export default function App() {
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
 
-  // PWA Install prompt state
+  // PWA Install State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  // Siren Audio Ref
+  const sirenAudioRef = useRef(null);
+  const [isSirenMuted, setIsSirenMuted] = useState(false);
 
   // Customer State
   const [cart, setCart] = useState([]);
@@ -100,21 +104,53 @@ export default function App() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
 
-  useEffect(() => {
-    // 1. PWA Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
-    }
+  // Admin Onboarding State
+  const [newStoreName, setNewStoreName] = useState('');
+  const [newStoreCat, setNewStoreCat] = useState('Kirana & Milk');
+  const [newStoreTime, setNewStoreTime] = useState('15-20 min');
+  const [newStoreRating, setNewStoreRating] = useState('4.8');
 
-    // 2. Dynamic Manifest Link Check
+  // WhatsApp Message Generator
+  const sendWhatsAppReceipt = (ord) => {
+    const mapUrl = ord.lat && ord.lng 
+      ? `https://maps.google.com/?q=${ord.lat},${ord.lng}` 
+      : `https://maps.google.com/?q=${encodeURIComponent(ord.address)}`;
+
+    const text = 
+`⚡ *NEPHKA 15-MIN ORDER RECEIPT* ⚡
+━━━━━━━━━━━━━━━━━━
+👤 *Customer:* ${ord.customer_name}
+📞 *Phone:* ${ord.customer_phone}
+📍 *Address:* ${ord.address}
+
+🛒 *ITEMS ORDERED:*
+${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i.qty}`).join('\n')}
+
+━━━━━━━━━━━━━━━━━━
+💰 *TOTAL BILL:* ₹${ord.total_amount}
+💳 *PAYMENT:* ${ord.payment_status} (${ord.payment_method})
+🗺️ *MAP LOCATION:* ${mapUrl}
+━━━━━━━━━━━━━━━━━━
+*Nephka - Fast Local Delivery*`;
+
+    const cleanPhone = ord.customer_phone.replace(/[^0-9]/g, '');
+    const phoneWithCode = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+    window.open(`https://wa.me/${phoneWithCode}?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  useEffect(() => {
+    // 1. Audio Setup for Dukaan Siren
+    sirenAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    sirenAudioRef.current.loop = true;
+
+    // 2. PWA Auto Setup
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
     if (!document.querySelector('link[rel="manifest"]')) {
       const manifestLink = document.createElement('link');
       manifestLink.rel = 'manifest';
       manifestLink.href = '/manifest.json';
       document.head.appendChild(manifestLink);
     }
-
-    // 3. Listen for Android PWA Install Event
     const handleBeforeInstall = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -122,7 +158,7 @@ export default function App() {
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-    // 4. URL Navigation Check
+    // 3. Navigation check
     const p = window.location.pathname.toLowerCase();
     const h = window.location.hash.toLowerCase();
     if (p.includes('dukaan') || h.includes('dukaan')) setCurrentView('dukaan');
@@ -130,11 +166,15 @@ export default function App() {
     else if (p.includes('rider') || h.includes('rider')) setCurrentView('rider');
     else setCurrentView('customer');
 
-    // 5. Initial Data Load
+    // 4. Initial load from Supabase
     const loadData = async () => {
       try {
+        const { data: sData } = await supabase.from('stores').select('*');
+        if (sData && sData.length > 0) setStores(sData);
+
         const { data: pData } = await supabase.from('products').select('*');
         if (pData && pData.length > 0) setProducts(pData);
+
         const { data: oData } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
         if (oData) setOrders(oData);
       } catch (err) {}
@@ -155,20 +195,30 @@ export default function App() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       supabase.removeChannel(channel);
+      if (sirenAudioRef.current) sirenAudioRef.current.pause();
     };
   }, []);
+
+  // Continuous Siren Controller for Dukaan Panel
+  const pendingOrdersCount = orders.filter((o) => o.status === 'placed').length;
+  useEffect(() => {
+    if (currentView === 'dukaan' && pendingOrdersCount > 0 && !isSirenMuted) {
+      sirenAudioRef.current?.play().catch(() => {});
+    } else {
+      sirenAudioRef.current?.pause();
+      if (sirenAudioRef.current) sirenAudioRef.current.currentTime = 0;
+    }
+  }, [currentView, pendingOrdersCount, isSirenMuted]);
 
   const handleInstallClick = () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          setShowInstallBanner(false);
-        }
+      deferredPrompt.userChoice.then((r) => {
+        if (r.outcome === 'accepted') setShowInstallBanner(false);
         setDeferredPrompt(null);
       });
     } else {
-      alert('iPhone ya Safari par app install karne ke liye: Share icon (⎋) dabayein aur "Add to Home Screen" par tap karein.');
+      alert('iPhone / Safari: Share icon (⎋) dabakar "Add to Home Screen" par click karein.');
     }
   };
 
@@ -207,7 +257,7 @@ export default function App() {
       },
       () => {
         setIsLocating(false);
-        alert('Location access enable karein.');
+        alert('Location access allow karein.');
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -264,6 +314,26 @@ export default function App() {
     setCart([]);
   };
 
+  const handleOnboardStore = async (e) => {
+    e.preventDefault();
+    if (!newStoreName) return alert('Dukaan ka naam zaroori hai!');
+    const newStore = {
+      id: 'store_' + Date.now(),
+      name: newStoreName,
+      category: newStoreCat,
+      delivery_time: newStoreTime,
+      rating: parseFloat(newStoreRating) || 4.8
+    };
+
+    try {
+      await supabase.from('stores').insert([newStore]);
+    } catch {}
+
+    setStores((prev) => [...prev, newStore]);
+    setNewStoreName('');
+    alert(`🎉 "${newStore.name}" dukaan live onboard ho gayi!`);
+  };
+
   const currentOrder = orders.find((o) => o.id === activeOrderId);
   const step = currentOrder?.status === 'delivered' ? 4 : currentOrder?.status === 'out_for_delivery' ? 3 : currentOrder?.status === 'accepted' ? 2 : 1;
   const totalRevenue = orders.reduce((acc, o) => acc + Number(o.total_amount || 0), 0);
@@ -271,40 +341,28 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-20 font-sans select-none">
       
-      {/* 1. CUSTOMER VIEW */}
+      {/* ======================================================== */}
+      {/* 1. CUSTOMER VIEW                                         */}
+      {/* ======================================================== */}
       {currentView === 'customer' && (
         <div>
-          {/* In-App PWA Install Banner */}
           {showInstallBanner && (
             <div className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-4 py-2.5 flex items-center justify-between text-xs font-bold shadow-md">
               <div className="flex items-center gap-2">
-                <span className="text-base">📲</span>
+                <span>📲</span>
                 <span>Install NEPHKA App for 1-Tap Access</span>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleInstallClick}
-                  className="bg-white text-orange-600 px-3 py-1 rounded-lg font-black shadow-xs hover:bg-orange-50 active:scale-95 transition"
-                >
-                  Install
-                </button>
-                <button
-                  onClick={() => setShowInstallBanner(false)}
-                  className="text-white/80 hover:text-white px-1"
-                >
-                  ✕
-                </button>
+                <button onClick={handleInstallClick} className="bg-white text-orange-600 px-3 py-1 rounded-lg font-black shadow-xs">Install</button>
+                <button onClick={() => setShowInstallBanner(false)} className="text-white/80 px-1">✕</button>
               </div>
             </div>
           )}
 
-          {/* Top Quick Bar */}
           <header className="sticky top-0 z-40 bg-white shadow-sm border-b px-4 py-3">
             <div className="max-w-md mx-auto flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-lg shadow-sm">
-                  N
-                </div>
+                <div className="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-lg shadow-sm">N</div>
                 <div>
                   <div className="flex items-center gap-1">
                     <span className="text-xs font-black uppercase text-slate-900">Delivery in</span>
@@ -316,16 +374,10 @@ export default function App() {
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
-                <button
-                  onClick={detectLiveLocation}
-                  className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition"
-                >
+                <button onClick={detectLiveLocation} className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
                   {isLocating ? '...' : '📍 GPS'}
                 </button>
-                <button
-                  onClick={handleInstallClick}
-                  className="text-[11px] bg-orange-50 text-orange-600 border border-orange-200 font-bold px-2 py-1.5 rounded-lg active:scale-95 transition"
-                >
+                <button onClick={handleInstallClick} className="text-[11px] bg-orange-50 text-orange-600 border border-orange-200 font-bold px-2 py-1.5 rounded-lg transition">
                   📲 App
                 </button>
               </div>
@@ -333,19 +385,17 @@ export default function App() {
           </header>
 
           <main className="max-w-md mx-auto px-3 pt-3 space-y-3">
-            {/* Promo Card */}
             <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 p-4 rounded-2xl text-white shadow-md relative overflow-hidden">
               <div className="relative z-10">
                 <span className="text-[10px] font-extrabold uppercase bg-white/25 px-2 py-0.5 rounded-full tracking-wider">Superfast Local</span>
                 <h2 className="text-xl font-black mt-1">NEPHKA 15-Min Store</h2>
-                <p className="text-xs text-orange-100 font-medium">Shuddh Mithai, Dairy & Dukaani Saman</p>
+                <p className="text-xs text-orange-100 font-medium">Shuddh Mithai, Dairy, Dawa & Dukaani Saman</p>
               </div>
               <div className="absolute -right-4 -bottom-6 text-7xl opacity-20 font-black">⚡</div>
             </div>
 
-            {/* Category Pills */}
-            <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-bold">
-              {['All', 'Sweets & Snacks', 'Kirana & Milk'].map((cat) => (
+            <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-bold no-scrollbar">
+              {['All', 'Sweets & Snacks', 'Kirana & Milk', 'Pharmacy', 'Fruits & Vegetables'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveTab(cat)}
@@ -358,7 +408,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Product Cards with Images & MRP */}
             <div className="space-y-4">
               {stores
                 .filter((st) => activeTab === 'All' || st.category === activeTab)
@@ -382,40 +431,25 @@ export default function App() {
                           const isOutOfStock = item.in_stock === false;
 
                           return (
-                            <div
-                              key={item.id}
-                              className={`bg-slate-50/60 rounded-xl p-2.5 border border-slate-100 flex flex-col justify-between ${
-                                isOutOfStock ? 'opacity-40' : ''
-                              }`}
-                            >
+                            <div key={item.id} className={`bg-slate-50/60 rounded-xl p-2.5 border border-slate-100 flex flex-col justify-between ${isOutOfStock ? 'opacity-40' : ''}`}>
                               <div>
                                 <div className="w-full h-28 bg-white rounded-lg overflow-hidden border border-slate-100 mb-2 relative">
-                                  <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                  />
+                                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
                                   {item.mrp && item.mrp > item.price && (
                                     <span className="absolute top-1 left-1 bg-emerald-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded shadow">
                                       {Math.round(((item.mrp - item.price) / item.mrp) * 100)}% OFF
                                     </span>
                                   )}
                                 </div>
-
                                 <p className="text-[10px] font-bold text-slate-400 uppercase">{item.unit}</p>
-                                <h4 className="text-xs font-bold text-slate-800 line-clamp-2 leading-snug mt-0.5">
-                                  {item.name}
-                                </h4>
+                                <h4 className="text-xs font-bold text-slate-800 line-clamp-2 leading-snug mt-0.5">{item.name}</h4>
                               </div>
 
                               <div className="flex justify-between items-center mt-3 pt-1">
                                 <div>
                                   <span className="text-xs font-black text-slate-900">₹{item.price}</span>
                                   {item.mrp && (
-                                    <span className="text-[10px] text-slate-400 line-through ml-1 font-semibold">
-                                      ₹{item.mrp}
-                                    </span>
+                                    <span className="text-[10px] text-slate-400 line-through ml-1 font-semibold">₹{item.mrp}</span>
                                   )}
                                 </div>
 
@@ -428,10 +462,7 @@ export default function App() {
                                     <button onClick={() => addToCart(item)} className="px-1 text-emerald-200">+</button>
                                   </div>
                                 ) : (
-                                  <button
-                                    onClick={() => addToCart(item)}
-                                    className="bg-white border-2 border-emerald-600 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-black px-3 py-1 rounded-lg shadow-sm transition uppercase"
-                                  >
+                                  <button onClick={() => addToCart(item)} className="bg-white border-2 border-emerald-600 text-emerald-700 text-xs font-black px-3 py-1 rounded-lg shadow-sm uppercase">
                                     ADD
                                   </button>
                                 )}
@@ -456,45 +487,32 @@ export default function App() {
             </footer>
           </main>
 
-          {/* Floating Cart Bar */}
           {cart.length > 0 && !showCheckout && (
             <div className="fixed bottom-3 left-0 right-0 z-40 px-4">
-              <div
-                onClick={() => setShowCheckout(true)}
-                className="max-w-md mx-auto bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500 transition"
-              >
+              <div onClick={() => setShowCheckout(true)} className="max-w-md mx-auto bg-emerald-600 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500">
                 <div className="flex items-center gap-3">
-                  <div className="bg-emerald-800 text-white font-black text-xs px-2.5 py-1.5 rounded-xl">
-                    🛒 {totalCartCount} ITEMS
-                  </div>
+                  <div className="bg-emerald-800 text-white font-black text-xs px-2.5 py-1.5 rounded-xl">🛒 {totalCartCount} ITEMS</div>
                   <div>
                     <p className="text-sm font-black leading-tight">₹{totalCartAmount}</p>
-                    {totalSavings > 0 && (
-                      <p className="text-[10px] text-emerald-200 font-bold">Saved ₹{totalSavings}!</p>
-                    )}
+                    {totalSavings > 0 && <p className="text-[10px] text-emerald-200 font-bold">Saved ₹{totalSavings}!</p>}
                   </div>
                 </div>
-
                 <div className="flex items-center gap-1 font-black text-xs bg-emerald-800/80 px-3 py-1.5 rounded-xl">
-                  <span>View Cart</span>
-                  <span>➔</span>
+                  <span>View Cart ➔</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Checkout Slide-Up */}
           {showCheckout && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-end justify-center">
               <div className="bg-white rounded-t-3xl max-w-md w-full p-4 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
                 <div className="flex justify-between items-center border-b pb-3">
                   <div>
-                    <h3 className="font-black text-base text-slate-800">Checkout Bill</h3>
+                    <h3 className="font-black text-base text-slate-800">Review & Place Order</h3>
                     <p className="text-xs text-slate-500 font-semibold">{totalCartCount} Items • ₹{totalCartAmount}</p>
                   </div>
-                  <button onClick={() => setShowCheckout(false)} className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">
-                    ✕
-                  </button>
+                  <button onClick={() => setShowCheckout(false)} className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">✕</button>
                 </div>
 
                 <div className="bg-slate-50 p-3 rounded-2xl border space-y-1.5 text-xs">
@@ -505,14 +523,14 @@ export default function App() {
                     </div>
                   ))}
                   <div className="border-t pt-2 mt-2 flex justify-between font-black text-sm text-slate-900">
-                    <span>Total Amount</span>
+                    <span>Total Bill</span>
                     <span className="text-emerald-700">₹{totalCartAmount}</span>
                   </div>
                 </div>
 
                 <form onSubmit={handlePlaceOrder} className="space-y-3 text-xs">
                   <input type="text" placeholder="Aapka Naam" required value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full p-2.5 rounded-xl border outline-none font-medium" />
-                  <input type="tel" placeholder="Mobile Number" required value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full p-2.5 rounded-xl border outline-none font-medium" />
+                  <input type="tel" placeholder="Mobile Number (WhatsApp)" required value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full p-2.5 rounded-xl border outline-none font-medium" />
                   
                   <div className="space-y-1">
                     <div className="flex justify-between items-center">
@@ -546,21 +564,21 @@ export default function App() {
             </div>
           )}
 
-          {/* Live Order Tracking Bar */}
           {currentOrder && (
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-2xl p-4 max-w-md mx-auto rounded-t-3xl space-y-3">
               <div className="flex justify-between items-center">
                 <div>
-                  <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
-                    ⚡ Live Status
-                  </span>
+                  <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">⚡ Live Status</span>
                   <h3 className="font-black text-base text-slate-900 mt-0.5">
                     {step === 4 ? '🎉 Delivered!' : 'Arriving in 14 Mins'}
                   </h3>
                 </div>
-                <button onClick={() => setActiveOrderId(null)} className="text-xs text-slate-400 font-bold px-2 py-1 bg-slate-100 rounded-lg">
-                  Close
-                </button>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => sendWhatsAppReceipt(currentOrder)} className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-xs">
+                    💬 Bill Slip
+                  </button>
+                  <button onClick={() => setActiveOrderId(null)} className="text-xs text-slate-400 font-bold px-2 py-1 bg-slate-100 rounded-lg">✕</button>
+                </div>
               </div>
 
               <div className="space-y-2 py-1">
@@ -586,9 +604,29 @@ export default function App() {
         </div>
       )}
 
-      {/* 2. DUKAAN VIEW */}
+      {/* ======================================================== */}
+      {/* 2. DUKAAN VIEW WITH CONTINUOUS SIREN & WHATSAPP          */}
+      {/* ======================================================== */}
       {currentView === 'dukaan' && (
         <div className="min-h-screen bg-slate-900 text-white p-4 max-w-md mx-auto">
+          {pendingOrdersCount > 0 && (
+            <div className="bg-rose-600 text-white p-3 rounded-2xl mb-3 flex items-center justify-between shadow-lg animate-pulse">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🚨</span>
+                <div>
+                  <p className="font-black text-xs uppercase tracking-wider">{pendingOrdersCount} NEW ORDER WAITING!</p>
+                  <p className="text-[10px] text-rose-100">Siren is ringing continuously</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsSirenMuted(!isSirenMuted)}
+                className="bg-white text-rose-700 text-xs font-black px-3 py-1 rounded-xl shadow-xs"
+              >
+                {isSirenMuted ? '🔊 Unmute' : '🔇 Mute Siren'}
+              </button>
+            </div>
+          )}
+
           <div className="flex justify-between items-center pb-3 border-b border-slate-800">
             <div>
               <h1 className="text-xl font-black text-orange-500">🏪 DUKAAN PARTNER</h1>
@@ -620,20 +658,35 @@ export default function App() {
                     <span className="font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 uppercase">{ord.status}</span>
                   </div>
                   <p className="text-slate-300">📍 {ord.address}</p>
+
                   <div className="border-t border-slate-700 pt-2 text-slate-300">
                     {ord.items?.map((it, idx) => <div key={idx}>{it.name} x {it.qty} (₹{it.price * it.qty})</div>)}
                     <div className="font-bold text-white pt-1">Total: ₹{ord.total_amount} ({ord.payment_status})</div>
                   </div>
-                  {ord.status === 'placed' && (
-                    <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="w-full py-2 bg-orange-600 font-bold rounded-lg">
-                      Accept Order
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      onClick={() => sendWhatsAppReceipt(ord)}
+                      className="py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1"
+                    >
+                      💬 WhatsApp Slip
                     </button>
-                  )}
-                  {ord.status === 'accepted' && (
-                    <button onClick={() => updateOrderStatus(ord.id, 'out_for_delivery')} className="w-full py-2 bg-blue-600 font-bold rounded-lg">
-                      Packing Ready ➔ Send Rider
-                    </button>
-                  )}
+                    {ord.status === 'placed' && (
+                      <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="py-2 bg-orange-600 hover:bg-orange-700 font-bold rounded-lg text-white">
+                        ✓ Accept Order
+                      </button>
+                    )}
+                    {ord.status === 'accepted' && (
+                      <button onClick={() => updateOrderStatus(ord.id, 'out_for_delivery')} className="py-2 bg-blue-600 hover:bg-blue-700 font-bold rounded-lg text-white">
+                        📦 Send to Rider
+                      </button>
+                    )}
+                    {ord.status === 'out_for_delivery' && (
+                      <span className="py-2 bg-slate-700 text-slate-300 font-bold rounded-lg text-center">
+                        🛵 Out with Rider
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -644,7 +697,7 @@ export default function App() {
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 if (!newItemName || !newItemPrice) return;
-                const item = { id: 'p_' + Date.now(), store_id: 'store-1', name: newItemName, price: Number(newItemPrice), unit: 'Standard Pack', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400', in_stock: true };
+                const item = { id: 'p_' + Date.now(), store_id: stores[0]?.id || 'store-1', name: newItemName, price: Number(newItemPrice), unit: 'Standard Pack', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400', in_stock: true };
                 try { await supabase.from('products').insert([item]); } catch {}
                 setProducts((prev) => [item, ...prev]);
                 setNewItemName('');
@@ -675,20 +728,22 @@ export default function App() {
         </div>
       )}
 
-      {/* 3. ADMIN VIEW */}
+      {/* ======================================================== */}
+      {/* 3. MASTER ADMIN VIEW (Store Onboarding & Analytics)      */}
+      {/* ======================================================== */}
       {currentView === 'admin' && (
-        <div className="min-h-screen bg-slate-950 text-white p-4 max-w-md mx-auto">
+        <div className="min-h-screen bg-slate-950 text-white p-4 max-w-md mx-auto space-y-4">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
             <div>
               <h1 className="text-xl font-black text-amber-500">👑 MASTER ADMIN</h1>
-              <p className="text-xs text-slate-400">Total Business Control</p>
+              <p className="text-xs text-slate-400">Total Business & Store Control</p>
             </div>
             <button onClick={() => navigateTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-3 py-1.5 rounded-lg border border-slate-700">
               Customer App ➔
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 my-4">
+          <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl">
               <p className="text-[11px] text-slate-400">Total Revenue</p>
               <p className="text-2xl font-black text-emerald-400 mt-1">₹{totalRevenue}</p>
@@ -699,15 +754,80 @@ export default function App() {
             </div>
           </div>
 
+          {/* STORE ONBOARDING FORM */}
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3">
+            <div className="flex justify-between items-center">
+              <h3 className="font-black text-xs uppercase tracking-wider text-amber-400">➕ Onboard New Local Store</h3>
+              <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-bold">{stores.length} Live</span>
+            </div>
+
+            <form onSubmit={handleOnboardStore} className="space-y-2.5 text-xs">
+              <div>
+                <label className="text-slate-400 block mb-1">Dukaan Ka Naam:</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Haryana Medicos / Gupta Fal Bhandar"
+                  required
+                  value={newStoreName}
+                  onChange={(e) => setNewStoreName(e.target.value)}
+                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-slate-400 block mb-1">Category:</label>
+                  <select
+                    value={newStoreCat}
+                    onChange={(e) => setNewStoreCat(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white outline-none"
+                  >
+                    <option value="Kirana & Milk">Kirana & Milk</option>
+                    <option value="Sweets & Snacks">Sweets & Snacks</option>
+                    <option value="Pharmacy">Pharmacy / Dawa</option>
+                    <option value="Fruits & Vegetables">Fruits & Vegetables</option>
+                    <option value="Bakery & Cakes">Bakery & Cakes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-slate-400 block mb-1">Delivery Time:</label>
+                  <input
+                    type="text"
+                    placeholder="15-20 min"
+                    value={newStoreTime}
+                    onChange={(e) => setNewStoreTime(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs shadow-md transition"
+              >
+                Onboard Store (Make Live)
+              </button>
+            </form>
+          </div>
+
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2 text-xs">
-            <h3 className="font-bold uppercase tracking-wider text-slate-400">Quick Links</h3>
-            <p className="text-slate-300">Dukaan: <span className="text-orange-400">nephka.com/dukaan</span></p>
-            <p className="text-slate-300">Rider: <span className="text-orange-400">nephka.com/rider</span></p>
+            <h3 className="font-bold uppercase tracking-wider text-slate-400">Live Active Stores</h3>
+            {stores.map((s) => (
+              <div key={s.id} className="flex justify-between items-center py-1.5 border-b border-slate-800/80 last:border-0">
+                <div>
+                  <p className="font-bold text-white">{s.name}</p>
+                  <p className="text-[10px] text-slate-400">{s.category} • {s.delivery_time}</p>
+                </div>
+                <span className="text-emerald-400 font-bold text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded">Active</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* 4. RIDER VIEW */}
+      {/* ======================================================== */}
+      {/* 4. RIDER VIEW WITH WHATSAPP NAVIGATION                   */}
+      {/* ======================================================== */}
       {currentView === 'rider' && (
         <div className="min-h-screen bg-slate-900 text-white p-4 max-w-md mx-auto">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -731,16 +851,26 @@ export default function App() {
                 return (
                   <div key={ord.id} className="bg-slate-800 p-3.5 rounded-xl border border-slate-700 space-y-2 text-xs">
                     <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-sm text-white">{ord.customer_name} ({ord.customer_phone})</h4>
+                      <div>
+                        <h4 className="font-bold text-sm text-white">{ord.customer_name}</h4>
+                        <p className="text-slate-400">📞 {ord.customer_phone}</p>
+                      </div>
                       <span className="text-xs font-bold text-blue-400 uppercase">{ord.status}</span>
                     </div>
                     <p className="text-slate-300">📍 {ord.address}</p>
                     <div className="p-2 rounded bg-slate-900 font-bold text-amber-300">
                       {ord.payment_method?.includes('UPI') ? '✅ ONLINE PAID (₹0 Collect)' : `💵 CASH TO COLLECT: ₹${ord.total_amount}`}
                     </div>
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      <a href={mapLink} target="_blank" rel="noreferrer" className="py-2 bg-blue-600 font-bold text-center rounded text-white">📍 GPS Route</a>
-                      <button onClick={() => updateOrderStatus(ord.id, 'delivered')} className="py-2 bg-emerald-600 font-bold rounded text-white">✅ Mark Delivered</button>
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      <a href={mapLink} target="_blank" rel="noreferrer" className="py-2 bg-blue-600 font-bold text-center rounded text-white flex items-center justify-center">
+                        📍 Map
+                      </a>
+                      <button onClick={() => sendWhatsAppReceipt(ord)} className="py-2 bg-emerald-600 font-bold rounded text-white flex items-center justify-center">
+                        💬 WhatsApp
+                      </button>
+                      <button onClick={() => updateOrderStatus(ord.id, 'delivered')} className="py-2 bg-emerald-500 font-bold rounded text-white flex items-center justify-center">
+                        ✅ Deliver
+                      </button>
                     </div>
                   </div>
                 );
