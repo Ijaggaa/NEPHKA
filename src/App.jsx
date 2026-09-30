@@ -9,133 +9,18 @@ const DEFAULT_STORES = [
 ];
 
 const DEFAULT_PRODUCTS = [
-  // --- 1. HALWAI & SWEETS (Real Indian Sweets Photos) ---
-  { 
-    id: 'p1', 
-    store_id: 'store-1', 
-    name: 'Desi Ghee Kurkuri Jalebi', 
-    price: 80, 
-    mrp: 110, 
-    unit: '250 gm (Garma-Garam)', 
-    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-  { 
-    id: 'p2', 
-    store_id: 'store-1', 
-    name: 'Special Aloo Matar Samosa (2 Pcs)', 
-    price: 30, 
-    mrp: 40, 
-    unit: '2 Pcs with Green & Meethi Chutney', 
-    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-  { 
-    id: 'p3', 
-    store_id: 'store-1', 
-    name: 'Shahi Mawa Gulab Jamun Box', 
-    price: 70, 
-    mrp: 90, 
-    unit: '4 Pcs Box', 
-    image: 'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-  { 
-    id: 'p4', 
-    store_id: 'store-1', 
-    name: 'Kaju Katli Special Vark', 
-    price: 230, 
-    mrp: 270, 
-    unit: '250 gm Pack', 
-    image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-
-  // --- 2. KIRANA & DAIRY (Real Milk, Atta, Butter Photos) ---
-  { 
-    id: 'p5', 
-    store_id: 'store-2', 
-    name: 'Fresh Cow Milk Pouch', 
-    price: 65, 
-    mrp: 68, 
-    unit: '1 Litre Pouch', 
-    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-  { 
-    id: 'p6', 
-    store_id: 'store-2', 
-    name: 'Chakki Fresh Sharbati Gehu Atta', 
-    price: 210, 
-    mrp: 245, 
-    unit: '5 kg Bag', 
-    image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-  { 
-    id: 'p7', 
-    store_id: 'store-2', 
-    name: 'Amul Salted Table Butter', 
-    price: 58, 
-    mrp: 60, 
-    unit: '100 gm Pack', 
-    image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-  { 
-    id: 'p8', 
-    store_id: 'store-2', 
-    name: 'Fortune Kachi Ghani Mustard Oil', 
-    price: 145, 
-    mrp: 165, 
-    unit: '1 Litre Bottle', 
-    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-
-  // --- 3. PHARMACY / MEDICAL ---
-  { 
-    id: 'p9', 
-    store_id: 'store-3', 
-    name: 'Dolo 650mg Tablets', 
-    price: 32, 
-    mrp: 35, 
-    unit: '15 Tablets Strip', 
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-  { 
-    id: 'p10', 
-    store_id: 'store-3', 
-    name: 'Band-Aid Washproof Strips', 
-    price: 50, 
-    mrp: 60, 
-    unit: 'Pack of 20 Strips', 
-    image: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-
-  // --- 4. TAAZA FAL & SABZI ---
-  { 
-    id: 'p11', 
-    store_id: 'store-4', 
-    name: 'Desi Pahadi Aloo (Potatoes)', 
-    price: 35, 
-    mrp: 45, 
-    unit: '1 kg Taaza Sabzi', 
-    image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  },
-  { 
-    id: 'p12', 
-    store_id: 'store-4', 
-    name: 'Fresh Robusta Bananas (Kela)', 
-    price: 50, 
-    mrp: 60, 
-    unit: '1 Dozen (12 Pcs)', 
-    image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=80', 
-    in_stock: true 
-  }
+  { id: 'p1', store_id: 'store-1', name: 'Desi Ghee Kurkuri Jalebi', price: 80, mrp: 110, unit: '250 gm', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p2', store_id: 'store-1', name: 'Special Aloo Matar Samosa (2 Pcs)', price: 30, mrp: 40, unit: '2 Pcs with Chutney', image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p3', store_id: 'store-1', name: 'Shahi Mawa Gulab Jamun Box', price: 70, mrp: 90, unit: '4 Pcs Box', image: 'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p4', store_id: 'store-1', name: 'Kaju Katli Special Vark', price: 230, mrp: 270, unit: '250 gm Pack', image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p5', store_id: 'store-2', name: 'Fresh Cow Milk Pouch', price: 65, mrp: 68, unit: '1 Litre Pouch', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p6', store_id: 'store-2', name: 'Chakki Fresh Sharbati Gehu Atta', price: 210, mrp: 245, unit: '5 kg Bag', image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p7', store_id: 'store-2', name: 'Amul Salted Table Butter', price: 58, mrp: 60, unit: '100 gm Pack', image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p8', store_id: 'store-2', name: 'Fortune Kachi Ghani Mustard Oil', price: 145, mrp: 165, unit: '1 Litre Bottle', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p9', store_id: 'store-3', name: 'Dolo 650mg Tablets', price: 32, mrp: 35, unit: '15 Tablets Strip', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p10', store_id: 'store-3', name: 'Band-Aid Washproof Strips', price: 50, mrp: 60, unit: 'Pack of 20 Strips', image: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p11', store_id: 'store-4', name: 'Desi Pahadi Aloo (Potatoes)', price: 35, mrp: 45, unit: '1 kg Taaza Sabzi', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p12', store_id: 'store-4', name: 'Fresh Robusta Bananas (Kela)', price: 50, mrp: 60, unit: '1 Dozen (12 Pcs)', image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=80', in_stock: true }
 ];
 
 const PHOTO_PRESETS = [
@@ -211,6 +96,7 @@ export default function App() {
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
 
+  // Dhanush-Teer Animation
   const [showArrowAnimation, setShowArrowAnimation] = useState(false);
   const [targetStoreInfo, setTargetStoreInfo] = useState(null);
 
@@ -223,10 +109,18 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
+  // Cart & Recipient Details
   const [cart, setCart] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
   const [showCheckout, setShowCheckout] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState(null);
+  
+  // Receiver Specific Inputs (Allows ordering for someone else)
+  const [receiverName, setReceiverName] = useState('');
+  const [receiverPhone, setReceiverPhone] = useState('');
+  const [deliveryNote, setDeliveryNote] = useState('');
+  const [isOrderingForOther, setIsOrderingForOther] = useState(false);
+
   const [address, setAddress] = useState('');
   const [coords, setCoords] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -252,6 +146,13 @@ export default function App() {
   const upiQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiIntentUrl)}`;
   const counterStandeeQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent('https://nephka.com')}`;
 
+  // When checkout opens, sync receiver defaults to logged-in user if empty
+  const handleOpenCheckout = () => {
+    if (!receiverName && currentUser?.name) setReceiverName(currentUser.name);
+    if (!receiverPhone && currentUser?.phone) setReceiverPhone(currentUser.phone);
+    setShowCheckout(true);
+  };
+
   const sendWhatsAppReceipt = (order) => {
     const mapLink = order.lat && order.lng 
       ? `https://maps.google.com/?q=${order.lat},${order.lng}` 
@@ -260,24 +161,24 @@ export default function App() {
     const msg = 
 `⚡ *NEPHKA 15-MIN EXPRESS RECEIPT* ⚡
 ━━━━━━━━━━━━━━━━━━━━
-👤 *Customer:* ${order.customer_name}
-📞 *Phone:* ${order.customer_phone}
-📍 *Address:* ${order.address}
-
+📦 *DELIVER TO:* ${order.customer_name}
+📞 *CALLING PHONE:* ${order.customer_phone}
+${order.ordered_by && order.ordered_by !== order.customer_name ? `👤 *BOOKED BY:* ${order.ordered_by}\n` : ''}📍 *ADDRESS:* ${order.address}
+${order.delivery_note ? `📝 *NOTE:* ${order.delivery_note}\n` : ''}
 🛒 *ORDERED ITEMS:*
 ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.price * it.qty}`).join('\n')}
 
 ━━━━━━━━━━━━━━━━━━━━
 💵 *Items Total:* ₹${order.item_subtotal || order.total_amount}
 🛵 *Delivery Fee:* ${order.delivery_fee === 0 ? 'FREE' : '₹' + order.delivery_fee}
-⚙️ *Platform Fee:* ₹${order.platform_fee || 0}
+⚙️️ *Platform Fee:* ₹${order.platform_fee || 0}
 💰 *GRAND TOTAL:* ₹${order.total_amount}
 💳 *PAYMENT:* ${order.payment_status} (${order.payment_method})
 🗺️ *MAP NAVIGATION:* ${mapLink}
 ━━━━━━━━━━━━━━━━━━━━
-*NEPHKA - Fast Hyperlocal Delivery*`;
+*NEPHKA - Apna Shehar, Aapki Dukaan*`;
 
-    const sanitizedPhone = order.customer_phone.replace(/[^0-9]/g, '');
+    const sanitizedPhone = (order.customer_phone || '').replace(/[^0-9]/g, '');
     const fullPhone = sanitizedPhone.length === 10 ? '91' + sanitizedPhone : sanitizedPhone;
     window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
@@ -385,6 +286,8 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     };
     localStorage.setItem('nephka_user', JSON.stringify(userObj));
     setCurrentUser(userObj);
+    setReceiverName(userObj.name);
+    setReceiverPhone(userObj.phone);
     routeTo('customer');
   };
 
@@ -523,10 +426,15 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     setCart((prev) => prev.map((i) => (i.id === prodId ? { ...i, qty: i.qty - 1 } : i)).filter((i) => i.qty > 0));
   };
 
+  // --- ORDER SUBMISSION WITH RECEIVER SPECIFICS ---
   const handlePlaceOrderSubmit = async (e) => {
     e.preventDefault();
-    if (cart.length === 0 || !currentUser?.name || !currentUser?.phone || !address) {
-      return alert('Poori delivery details bharein!');
+
+    const finalReceiverName = receiverName.trim() || currentUser?.name || 'Customer';
+    const finalReceiverPhone = receiverPhone.trim() || currentUser?.phone || '';
+
+    if (cart.length === 0 || !finalReceiverName || !finalReceiverPhone || !address) {
+      return alert('Kripya Delivery lene wale ka Naam, Mobile number aur Address poora bharein!');
     }
 
     setIsSubmitting(true);
@@ -536,8 +444,10 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     const orderRecord = {
       id: 'ord_' + Date.now(),
       store_id: destinationStore.id,
-      customer_name: currentUser.name,
-      customer_phone: currentUser.phone,
+      customer_name: finalReceiverName,
+      customer_phone: finalReceiverPhone,
+      ordered_by: currentUser?.name || finalReceiverName,
+      delivery_note: deliveryNote.trim() || null,
       address,
       lat: coords?.lat || null,
       lng: coords?.lng || null,
@@ -635,11 +545,11 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Aapka Naam:</label>
+                <label className="font-bold text-slate-700 block mb-1">Aapka Asli Naam:</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Ramesh Kumar"
+                  placeholder="e.g. Pardeep Kumar"
                   value={custNameInput}
                   onChange={(e) => setCustNameInput(e.target.value)}
                   className="w-full p-3 rounded-xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-orange-500"
@@ -781,9 +691,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                   </div>
 
                   <div>
-                    <label className="font-bold text-slate-800 block mb-0.5">
-                      Aadhaar Card Number (12 Digits):
-                    </label>
+                    <label className="font-bold text-slate-800 block mb-0.5">Aadhaar Card Number (12 Digits):</label>
                     <input
                       type="text"
                       maxLength={12}
@@ -796,9 +704,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                   </div>
 
                   <div>
-                    <label className="font-bold text-slate-800 block mb-0.5">
-                      PAN Card Number (10 Characters):
-                    </label>
+                    <label className="font-bold text-slate-800 block mb-0.5">PAN Card Number (10 Characters):</label>
                     <input
                       type="text"
                       maxLength={10}
@@ -1066,10 +972,10 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             })}
           </div>
 
-          {/* Floating Cart */}
+          {/* Floating Cart Strip */}
           {cart.length > 0 && !showCheckout && (
             <div className="fixed bottom-3 left-0 right-0 z-40 px-4">
-              <div onClick={() => setShowCheckout(true)} className="max-w-md mx-auto bg-emerald-600 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500">
+              <div onClick={handleOpenCheckout} className="max-w-md mx-auto bg-emerald-600 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500">
                 <div>
                   <p className="text-sm font-black leading-tight">₹{grandTotalAmount} • {totalCartCount} ITEMS</p>
                   <p className="text-[10px] text-emerald-200 font-bold">{deliveryFee === 0 ? '✓ Free Delivery Applied' : 'Add more for Free Delivery'}</p>
@@ -1079,12 +985,15 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </div>
           )}
 
-          {/* Checkout Slide-Up Sheet */}
+          {/* Checkout Slide-Up Sheet with Full Recipient Editing */}
           {showCheckout && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-end justify-center">
-              <div className="bg-white rounded-t-3xl max-w-md w-full p-4 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
+              <div className="bg-white rounded-t-3xl max-w-md w-full p-4 max-h-[92vh] overflow-y-auto space-y-4 shadow-2xl">
                 <div className="flex justify-between items-center border-b pb-3">
-                  <h3 className="font-black text-base text-slate-800">Checkout Bill</h3>
+                  <div>
+                    <h3 className="font-black text-base text-slate-800">Review & Place Order</h3>
+                    <p className="text-xs text-slate-500 font-semibold">{totalCartCount} Items • Bill ₹{grandTotalAmount}</p>
+                  </div>
                   <button onClick={() => setShowCheckout(false)} className="w-8 h-8 rounded-full bg-slate-100 font-bold">✕</button>
                 </div>
 
@@ -1102,20 +1011,125 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                 </div>
 
                 <form onSubmit={handlePlaceOrderSubmit} className="space-y-3 text-xs">
+                  
+                  {/* RECIPIENT PERSON SELECTION (Aapka ya kisi aur ke liye) */}
+                  <div className="bg-orange-50/70 border border-orange-200/80 p-3 rounded-2xl space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-black text-orange-950 flex items-center gap-1.5">
+                        <span>📦</span> Kisko Delivery Deni Hai?
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOrderingForOther(!isOrderingForOther);
+                          if (!isOrderingForOther) {
+                            setReceiverName('');
+                            setReceiverPhone('');
+                          } else {
+                            setReceiverName(currentUser?.name || '');
+                            setReceiverPhone(currentUser?.phone || '');
+                          }
+                        }}
+                        className="text-[11px] font-bold text-orange-700 underline"
+                      >
+                        {isOrderingForOther ? 'Khud Ke Liye Mangwayein' : 'Kisi Aur Ke Liye?'}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                          Delivery Receiver Name:
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Receiver Name"
+                          value={receiverName}
+                          onChange={(e) => setReceiverName(e.target.value)}
+                          className="w-full p-2.5 rounded-xl border bg-white outline-none font-bold text-slate-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                          Calling Number (Rider Call):
+                        </label>
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          required
+                          placeholder="10-digit Phone"
+                          value={receiverPhone}
+                          onChange={(e) => setReceiverPhone(e.target.value)}
+                          className="w-full p-2.5 rounded-xl border bg-white outline-none font-bold text-slate-900"
+                        />
+                      </div>
+                    </div>
+
+                    {currentUser && currentUser.name !== receiverName && (
+                      <p className="text-[10px] text-orange-800 font-semibold">
+                        ✓ Booking by: <span className="font-bold">{currentUser.name}</span> | Delivery to: <span className="font-bold">{receiverName || '...'}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* ADDRESS FIELD */}
                   <div>
-                    <label className="font-bold text-slate-700">Delivery Address:</label>
-                    <textarea rows={2} required placeholder="Ghar / Flat / Gali No." value={address} onChange={(e) => setAddress(e.target.value)} className="w-full p-2.5 rounded-xl border outline-none font-medium mt-1" />
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="font-bold text-slate-700">Delivery Address:</label>
+                      <button
+                        type="button"
+                        onClick={detectGpsLocation}
+                        className="text-[11px] font-black text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-md"
+                      >
+                        {isLocating ? 'GPS...' : '📍 Use Current Location'}
+                      </button>
+                    </div>
+                    <textarea
+                      rows={2}
+                      required
+                      placeholder="Ghar / Flat / Gali No."
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border outline-none font-medium"
+                    />
+                  </div>
+
+                  {/* SPECIAL INSTRUCTIONS / NOTE */}
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Rider Instruction / Landmark (Optional):</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Near Shiv Mandir / Gate par de dein"
+                      value={deliveryNote}
+                      onChange={(e) => setDeliveryNote(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border outline-none"
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => setPaymentMethod('cod')} className={`py-2 rounded-xl border font-bold ${paymentMethod === 'cod' ? 'border-emerald-600 bg-emerald-50 text-emerald-800' : 'bg-slate-50'}`}>💵 Cash on Delivery</button>
-                    <button type="button" onClick={() => setPaymentMethod('upi')} className={`py-2 rounded-xl border font-bold ${paymentMethod === 'upi' ? 'border-emerald-600 bg-emerald-50 text-emerald-800' : 'bg-slate-50'}`}>⚡ UPI / GPay</button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('cod')}
+                      className={`py-2 rounded-xl border font-bold ${paymentMethod === 'cod' ? 'border-emerald-600 bg-emerald-50 text-emerald-800' : 'bg-slate-50'}`}
+                    >
+                      💵 Cash on Delivery
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('upi')}
+                      className={`py-2 rounded-xl border font-bold ${paymentMethod === 'upi' ? 'border-emerald-600 bg-emerald-50 text-emerald-800' : 'bg-slate-50'}`}
+                    >
+                      ⚡ UPI / GPay
+                    </button>
                   </div>
 
                   {paymentMethod === 'upi' && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center space-y-2">
                       <img src={upiQrCodeUrl} alt="UPI QR" className="w-32 h-32 mx-auto border rounded-xl" />
-                      <a href={upiIntentUrl} className="block w-full py-2 bg-emerald-600 text-white font-black rounded-xl">📱 Open GPay / PhonePe</a>
+                      <a href={upiIntentUrl} className="block w-full py-2 bg-emerald-600 text-white font-black rounded-xl">
+                        📱 Open GPay / PhonePe
+                      </a>
                     </div>
                   )}
 
@@ -1136,8 +1150,20 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
           {trackedOrder && (
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t p-4 max-w-md mx-auto rounded-t-3xl shadow-2xl space-y-2">
               <div className="flex justify-between items-center">
-                <h3 className="font-black text-sm text-slate-900">{trackStep === 4 ? '🎉 Delivered!' : 'Arriving in 14 Mins'}</h3>
-                <button onClick={() => sendWhatsAppReceipt(trackedOrder)} className="text-xs bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg">💬 WhatsApp</button>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900">
+                    {trackStep === 4 ? '🎉 Delivered!' : 'Arriving in 14 Mins'}
+                  </h3>
+                  <p className="text-[10px] text-slate-500 font-semibold">
+                    Delivery for: <span className="font-bold text-slate-800">{trackedOrder.customer_name}</span> (📞 {trackedOrder.customer_phone})
+                  </p>
+                </div>
+                <button
+                  onClick={() => sendWhatsAppReceipt(trackedOrder)}
+                  className="text-xs bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-xs"
+                >
+                  💬 WhatsApp
+                </button>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full flex">
                 <div className={`h-full bg-emerald-500 ${trackStep === 1 ? 'w-1/4' : trackStep === 2 ? 'w-2/4' : trackStep === 3 ? 'w-3/4' : 'w-full'}`} />
@@ -1183,31 +1209,55 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 
           {dukaanTab === 'orders' && (
             <div className="space-y-3">
-              {orders.map((ord) => (
-                <div key={ord.id} className="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 text-xs">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-bold text-sm text-white">{ord.customer_name}</h4>
-                      <p className="text-slate-400">📞 {ord.customer_phone}</p>
+              {orders.length === 0 ? (
+                <p className="text-center text-xs text-slate-500 py-10">Koi order pending nahi hai.</p>
+              ) : (
+                orders.map((ord) => (
+                  <div key={ord.id} className="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 text-xs">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        {/* Clear Receiver & Booked by distinction */}
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="font-bold text-sm text-white">📦 Deliver to: {ord.customer_name}</h4>
+                        </div>
+                        <a href={`tel:${ord.customer_phone}`} className="text-xs text-emerald-400 font-bold block mt-0.5">
+                          📞 Call Receiver: {ord.customer_phone}
+                        </a>
+                        {ord.ordered_by && ord.ordered_by !== ord.customer_name && (
+                          <p className="text-[10px] text-slate-400 mt-0.5">👤 Ordered By: {ord.ordered_by}</p>
+                        )}
+                        {ord.delivery_note && (
+                          <p className="text-[10px] text-amber-300 bg-slate-900 px-2 py-0.5 rounded mt-1">📝 Note: {ord.delivery_note}</p>
+                        )}
+                      </div>
+                      <span className="font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 uppercase">{ord.status}</span>
                     </div>
-                    <span className="font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 uppercase">{ord.status}</span>
+                    
+                    <p className="text-slate-300">📍 {ord.address}</p>
+                    
+                    <div className="border-t border-slate-700 pt-2 text-slate-300">
+                      {ord.items?.map((it, idx) => <div key={idx}>{it.name} x {it.qty} (₹{it.price * it.qty})</div>)}
+                      <div className="font-bold text-white pt-1">Total: ₹{ord.total_amount} ({ord.payment_status})</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <button onClick={() => sendWhatsAppReceipt(ord)} className="py-2 bg-emerald-600 font-bold rounded-lg text-white">
+                        💬 WhatsApp Slip
+                      </button>
+                      {ord.status === 'placed' && (
+                        <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="py-2 bg-orange-600 font-bold rounded-lg text-white">
+                          ✓ Accept
+                        </button>
+                      )}
+                      {ord.status === 'accepted' && (
+                        <button onClick={() => updateOrderStatus(ord.id, 'out_for_delivery')} className="py-2 bg-blue-600 font-bold rounded-lg text-white">
+                          📦 Send Rider
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-slate-300">📍 {ord.address}</p>
-                  <div className="border-t border-slate-700 pt-2 text-slate-300">
-                    {ord.items?.map((it, idx) => <div key={idx}>{it.name} x {it.qty} (₹{it.price * it.qty})</div>)}
-                    <div className="font-bold text-white pt-1">Total: ₹{ord.total_amount} ({ord.payment_status})</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <button onClick={() => sendWhatsAppReceipt(ord)} className="py-2 bg-emerald-600 font-bold rounded-lg text-white">💬 WhatsApp</button>
-                    {ord.status === 'placed' && (
-                      <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="py-2 bg-orange-600 font-bold rounded-lg text-white">✓ Accept</button>
-                    )}
-                    {ord.status === 'accepted' && (
-                      <button onClick={() => updateOrderStatus(ord.id, 'out_for_delivery')} className="py-2 bg-blue-600 font-bold rounded-lg text-white">📦 Send Rider</button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
 
@@ -1254,7 +1304,67 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
         </div>
       )}
 
-      {/* VIEW 4: ADMIN VIEW */}
+      {/* VIEW 4: RIDER PANEL */}
+      {currentView === 'rider' && (
+        <div className="min-h-screen bg-slate-900 text-white p-4 max-w-md mx-auto space-y-3">
+          <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+            <h1 className="text-lg font-black text-emerald-400">🛵 RIDER PARTNER</h1>
+            <button onClick={() => routeTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-2.5 py-1.5 rounded-lg border border-slate-700">Exit</button>
+          </div>
+
+          <div className="space-y-3">
+            {orders.filter((o) => o.status !== 'delivered').length === 0 ? (
+              <p className="text-center text-xs text-slate-500 py-10">Sabhi deliveries complete hain!</p>
+            ) : (
+              orders.filter((o) => o.status !== 'delivered').map((ord) => {
+                const mapLink = ord.lat && ord.lng
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${ord.lat},${ord.lng}`
+                  : `https://maps.google.com/?q=${encodeURIComponent(ord.address)}`;
+
+                return (
+                  <div key={ord.id} className="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 text-xs">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-sm text-white">📦 Deliver to: {ord.customer_name}</h4>
+                        <a href={`tel:${ord.customer_phone}`} className="text-xs text-emerald-400 font-bold block mt-0.5">
+                          📞 Call Receiver: {ord.customer_phone}
+                        </a>
+                        {ord.ordered_by && ord.ordered_by !== ord.customer_name && (
+                          <p className="text-[10px] text-slate-400">👤 Ordered by: {ord.ordered_by}</p>
+                        )}
+                        {ord.delivery_note && (
+                          <p className="text-[10px] text-amber-300 bg-slate-900 px-2 py-0.5 rounded mt-1">📝 Note: {ord.delivery_note}</p>
+                        )}
+                      </div>
+                      <span className="font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 uppercase">{ord.status}</span>
+                    </div>
+
+                    <p className="text-slate-300">📍 {ord.address}</p>
+
+                    <div className="p-2 rounded bg-slate-900 font-bold text-amber-300">
+                      {ord.payment_method?.includes('UPI') ? '✅ ONLINE PAID (₹0 Collect)' : `💵 CASH TO COLLECT: ₹${ord.total_amount}`}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      <a href={mapLink} target="_blank" rel="noreferrer" className="py-2 bg-blue-600 font-bold text-center rounded text-white flex items-center justify-center">
+                        📍 Map
+                      </a>
+                      <a href={`tel:${ord.customer_phone}`} className="py-2 bg-emerald-600 font-bold text-center rounded text-white flex items-center justify-center">
+                        📞 Call
+                      </a>
+                      <button onClick={() => updateOrderStatus(ord.id, 'delivered')} className="py-2 bg-emerald-500 font-bold rounded text-white flex items-center justify-center">
+                        ✅ Deliver
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 5: ADMIN VIEW */}
       {currentView === 'admin' && (
         <div className="min-h-screen bg-slate-950 text-white p-4 max-w-md mx-auto space-y-4">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
