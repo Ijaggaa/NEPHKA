@@ -4,110 +4,321 @@ import { supabase } from './supabase';
 const DEFAULT_STORES = [
   { id: 'store-1', name: 'Shree Balaji Sweets & Chaat', category: 'Sweets & Snacks', delivery_time: '12-15 min', rating: 4.8 },
   { id: 'store-2', name: 'Kisan Kirana & Daily Dairy', category: 'Kirana & Milk', delivery_time: '15-20 min', rating: 4.9 },
-  { id: 'store-3', name: 'Haryana Medicos & Wellness', category: 'Pharmacy', delivery_time: '10-15 min', rating: 4.9 }
+  { id: 'store-3', name: 'Haryana Medicos & Health', category: 'Pharmacy', delivery_time: '10-15 min', rating: 4.9 },
+  { id: 'store-4', name: 'Kisan Taaza Sabzi & Fal Mandi', category: 'Fruits & Vegetables', delivery_time: '12-18 min', rating: 4.7 }
 ];
 
 const DEFAULT_PRODUCTS = [
+  // --- 1. HALWAI & SWEETS (store-1) ---
   { 
     id: 'p1', 
     store_id: 'store-1', 
-    name: 'Desi Ghee Jalebi & Rabri', 
+    name: 'Desi Ghee Jalebi & Malai Rabri', 
     price: 80, 
     mrp: 110, 
-    unit: '250 gm',
-    image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=400&auto=format&fit=crop&q=80',
+    unit: '250 gm (Garma-garam)',
+    image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&auto=format&fit=crop&q=80',
     in_stock: true 
   },
   { 
     id: 'p2', 
     store_id: 'store-1', 
-    name: 'Special Aloo Samosa (2 Pcs)', 
+    name: 'Special Aloo Matar Samosa (2 Pcs)', 
     price: 30, 
     mrp: 40, 
-    unit: '2 Pcs with Chutney',
-    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&auto=format&fit=crop&q=80',
+    unit: '2 Pcs + Meethi & Green Chutney',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=80',
     in_stock: true 
   },
   { 
     id: 'p3', 
     store_id: 'store-1', 
-    name: 'Amritsari Chole Bhature Box', 
-    price: 90, 
-    mrp: 120, 
-    unit: '2 Bhature + Special Chole',
-    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=400&auto=format&fit=crop&q=80',
+    name: 'Gulab Jamun Shahi Box', 
+    price: 70, 
+    mrp: 90, 
+    unit: '4 Pcs Box',
+    image: 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?w=500&auto=format&fit=crop&q=80',
     in_stock: true 
   },
   { 
     id: 'p4', 
-    store_id: 'store-2', 
-    name: 'Taaza Cow Milk Pouch', 
-    price: 65, 
-    mrp: 68, 
-    unit: '1 Litre Pouch',
-    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&auto=format&fit=crop&q=80',
+    store_id: 'store-1', 
+    name: 'Kaju Katli Silver Vark Special', 
+    price: 230, 
+    mrp: 270, 
+    unit: '250 gm Pack',
+    image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&auto=format&fit=crop&q=80',
     in_stock: true 
   },
   { 
     id: 'p5', 
-    store_id: 'store-2', 
-    name: 'Chakki Fresh Sharbati Atta', 
-    price: 210, 
-    mrp: 245, 
-    unit: '5 kg Pack',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80',
+    store_id: 'store-1', 
+    name: 'Khasta Moong Dal Kachori', 
+    price: 40, 
+    mrp: 50, 
+    unit: '2 Pcs with Aloo Jhol',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=500&auto=format&fit=crop&q=80',
     in_stock: true 
   },
   { 
     id: 'p6', 
+    store_id: 'store-1', 
+    name: 'Paneer Chole Bhature Special', 
+    price: 90, 
+    mrp: 120, 
+    unit: '2 Bhature + Pindi Chole + Achar',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p7', 
+    store_id: 'store-1', 
+    name: 'Gujarati Nylon Khaman Dhokla', 
+    price: 50, 
+    mrp: 65, 
+    unit: '250 gm Taaza',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+
+  // --- 2. KIRANA & DAILY DAIRY (store-2) ---
+  { 
+    id: 'p8', 
+    store_id: 'store-2', 
+    name: 'Fresh Cow Milk Pouch', 
+    price: 65, 
+    mrp: 68, 
+    unit: '1 Litre Pouch',
+    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p9', 
+    store_id: 'store-2', 
+    name: 'Chakki Fresh Sharbati Gehu Atta', 
+    price: 210, 
+    mrp: 245, 
+    unit: '5 kg Bag',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p10', 
     store_id: 'store-2', 
     name: 'Amul Salted Table Butter', 
     price: 58, 
     mrp: 60, 
     unit: '100 gm Pack',
-    image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=400&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&auto=format&fit=crop&q=80',
     in_stock: true 
   },
   { 
-    id: 'p7', 
+    id: 'p11', 
+    store_id: 'store-2', 
+    name: 'Fortune Kachi Ghani Mustard Oil', 
+    price: 145, 
+    mrp: 165, 
+    unit: '1 Litre Bottle',
+    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p12', 
+    store_id: 'store-2', 
+    name: 'Maggi 2-Minute Masala Noodles', 
+    price: 56, 
+    mrp: 60, 
+    unit: 'Pack of 4 (280g)',
+    image: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p13', 
+    store_id: 'store-2', 
+    name: 'Tata Tea Premium Kadak Chai', 
+    price: 140, 
+    mrp: 160, 
+    unit: '500 gm Pack',
+    image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p14', 
+    store_id: 'store-2', 
+    name: 'Madhur Pure Sulphurless Sugar', 
+    price: 48, 
+    mrp: 55, 
+    unit: '1 kg Pouch',
+    image: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p15', 
+    store_id: 'store-2', 
+    name: 'India Gate Feast Rozzana Basmati', 
+    price: 110, 
+    mrp: 135, 
+    unit: '1 kg Pack',
+    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p16', 
+    store_id: 'store-2', 
+    name: 'Dettol Original Bathing Soap (3+1)', 
+    price: 115, 
+    mrp: 130, 
+    unit: '4 x 75g Soaps',
+    image: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+
+  // --- 3. PHARMACY / MEDICAL STORE (store-3) ---
+  { 
+    id: 'p17', 
     store_id: 'store-3', 
-    name: 'Dolo 650mg Paracetamol', 
+    name: 'Dolo 650mg Paracetamol Tablets', 
     price: 32, 
     mrp: 35, 
-    unit: '15 Tablets Strip',
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80',
+    unit: 'Strip of 15 Tablets',
+    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80',
     in_stock: true 
   },
   { 
-    id: 'p8', 
+    id: 'p18', 
     store_id: 'store-3', 
-    name: 'Band-Aid First Aid Strips', 
+    name: 'Volini Fast Pain Relief Spray', 
+    price: 130, 
+    mrp: 155, 
+    unit: '40g Aerosol Can',
+    image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p19', 
+    store_id: 'store-3', 
+    name: 'Band-Aid Washproof Strips', 
     price: 50, 
     mrp: 60, 
-    unit: '20 Strips Box',
-    image: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400&auto=format&fit=crop&q=80',
+    unit: 'Pack of 20 Strips',
+    image: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p20', 
+    store_id: 'store-3', 
+    name: 'Dettol Antiseptic Liquid', 
+    price: 85, 
+    mrp: 95, 
+    unit: '125 ml Bottle',
+    image: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p21', 
+    store_id: 'store-3', 
+    name: 'Vicks VapoRub Cold & Cough', 
+    price: 45, 
+    mrp: 50, 
+    unit: '25 ml Jar',
+    image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p22', 
+    store_id: 'store-3', 
+    name: 'Electral ORS Energy Sachet', 
+    price: 22, 
+    mrp: 25, 
+    unit: '21.8 gm Pack',
+    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+
+  // --- 4. FAL & SABZI (store-4) ---
+  { 
+    id: 'p23', 
+    store_id: 'store-4', 
+    name: 'Desi Pahadi Aloo (Potatoes)', 
+    price: 35, 
+    mrp: 45, 
+    unit: '1 kg Taaza Sabzi',
+    image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p24', 
+    store_id: 'store-4', 
+    name: 'Nasik Red Onions (Pyaaz)', 
+    price: 40, 
+    mrp: 50, 
+    unit: '1 kg (Medium Size)',
+    image: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p25', 
+    store_id: 'store-4', 
+    name: 'Hybrid Red Juicy Tomatoes', 
+    price: 30, 
+    mrp: 40, 
+    unit: '1 kg Salad Tamatar',
+    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p26', 
+    store_id: 'store-4', 
+    name: 'Fresh Robusta Bananas (Kela)', 
+    price: 50, 
+    mrp: 60, 
+    unit: '1 Dozen (12 Pcs)',
+    image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=80',
+    in_stock: true 
+  },
+  { 
+    id: 'p27', 
+    store_id: 'store-4', 
+    name: 'Royal Shimla Red Apples (Seb)', 
+    price: 120, 
+    mrp: 150, 
+    unit: '1 kg Sweet Apples',
+    image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&auto=format&fit=crop&q=80',
     in_stock: true 
   }
 ];
 
+// PHOTO PRESETS FOR DUKAANDAR TO ADD ITEMS WITH 1 TAP
+const PHOTO_PRESETS = [
+  { label: '🍨 Mithai', url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500' },
+  { label: '🥟 Samosa/Snacks', url: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500' },
+  { label: '🥛 Doodh/Milk', url: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500' },
+  { label: '🌾 Atta/Grain', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500' },
+  { label: '🍜 Maggi/Noodles', url: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500' },
+  { label: '💊 Dawa/Medicine', url: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500' },
+  { label: '🍎 Seb/Fruits', url: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500' },
+  { label: '🥔 Sabzi/Veggies', url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500' },
+  { label: '🧴 Soap/Care', url: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=500' }
+];
+
 export default function App() {
-  const [currentView, setCurrentView] = useState('customer'); // 'customer', 'dukaan', 'admin', 'rider', 'poster'
+  const [currentView, setCurrentView] = useState('customer');
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
 
-  // Business Configuration (Admin Managed)
+  // Config State
   const [upiId, setUpiId] = useState(() => localStorage.getItem('nephka_upi') || 'nephka@upi');
   const [supportPhone, setSupportPhone] = useState(() => localStorage.getItem('nephka_phone') || '919876543210');
   const [savedConfigNotice, setSavedConfigNotice] = useState(false);
 
-  // Audio Siren & PWA
+  // Siren Audio & PWA
   const sirenAudioRef = useRef(null);
   const [isSirenMuted, setIsSirenMuted] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-  // Customer Shopping Flow
+  // Customer Shopping
   const [cart, setCart] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
   const [showCheckout, setShowCheckout] = useState(false);
@@ -117,16 +328,18 @@ export default function App() {
   const [address, setAddress] = useState('');
   const [coords, setCoords] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'upi'
+  const [paymentMethod, setPaymentMethod] = useState('cod');
   const [utrNumber, setUtrNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Dukaan Panel
-  const [dukaanTab, setDukaanTab] = useState('orders'); // 'orders', 'menu'
+  // Dukaan Panel Stock & Item Adding
+  const [dukaanTab, setDukaanTab] = useState('orders');
+  const [selectedDukaanStore, setSelectedDukaanStore] = useState('store-1');
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
+  const [newItemMrp, setNewItemMrp] = useState('');
   const [newItemUnit, setNewItemUnit] = useState('Standard Pack');
-  const [newItemStoreId, setNewItemStoreId] = useState('store-1');
+  const [newItemImage, setNewItemImage] = useState(PHOTO_PRESETS[0].url);
 
   // Admin Onboarding
   const [newStoreName, setNewStoreName] = useState('');
@@ -134,7 +347,7 @@ export default function App() {
   const [newStoreTime, setNewStoreTime] = useState('15-20 min');
   const [newStoreRating, setNewStoreRating] = useState('4.8');
 
-  // Pricing Architecture
+  // Pricing
   const itemTotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
   const totalCartCount = cart.reduce((acc, item) => acc + item.qty, 0);
   const totalSavings = cart.reduce((acc, item) => acc + ((item.mrp || item.price) - item.price) * item.qty, 0);
@@ -151,7 +364,7 @@ export default function App() {
       ? `https://maps.google.com/?q=${order.lat},${order.lng}` 
       : `https://maps.google.com/?q=${encodeURIComponent(order.address)}`;
 
-    const receiptMessage = 
+    const msg = 
 `⚡ *NEPHKA 15-MIN EXPRESS RECEIPT* ⚡
 ━━━━━━━━━━━━━━━━━━━━
 👤 *Customer:* ${order.customer_name}
@@ -173,7 +386,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 
     const sanitizedPhone = order.customer_phone.replace(/[^0-9]/g, '');
     const fullPhone = sanitizedPhone.length === 10 ? '91' + sanitizedPhone : sanitizedPhone;
-    window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(receiptMessage)}`, '_blank');
+    window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   useEffect(() => {
@@ -273,6 +486,12 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     setProducts((prev) => prev.map((p) => (p.id === prodId ? { ...p, in_stock: nextStock } : p)));
   };
 
+  const deleteProduct = async (prodId) => {
+    if (!window.confirm('Kya aap is item ko menu se hatana chahte hain?')) return;
+    try { await supabase.from('products').delete().eq('id', prodId); } catch {}
+    setProducts((prev) => prev.filter((p) => p.id !== prodId));
+  };
+
   const modifyProductPrice = async (prodId) => {
     const entered = prompt('Naya Price (₹) enter karein:');
     if (!entered || isNaN(entered)) return;
@@ -282,7 +501,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
   };
 
   const detectGpsLocation = () => {
-    if (!navigator.geolocation) return alert('Aapke browser mein GPS available nahi hai.');
+    if (!navigator.geolocation) return alert('Browser mein GPS available nahi hai.');
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -313,7 +532,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
       const activeStoreName = stores.find((s) => s.id === cart[0].store_id)?.name || 'Pehli Dukaan';
       const targetStoreName = stores.find((s) => s.id === item.store_id)?.name || 'Nayi Dukaan';
       const proceed = window.confirm(
-        `Cart mein pehle se "${activeStoreName}" ke items hain!\n\nHyperlocal delivery ke liye ek baar mein sirf ek dukaan se order ho sakta hai.\n\nKya aap cart reset karke "${targetStoreName}" se order karna chahte hain?`
+        `Cart mein pehle se "${activeStoreName}" ke items hain!\n\nEk baar mein sirf ek dukaan se order ho sakta hai.\n\nKya aap cart reset karke "${targetStoreName}" se order shuru karna chahte hain?`
       );
       if (proceed) {
         setCart([{ ...item, qty: 1 }]);
@@ -336,7 +555,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
   const handlePlaceOrderSubmit = async (e) => {
     e.preventDefault();
     if (cart.length === 0 || !customerName || !customerPhone || !address) {
-      return alert('Kripya poori delivery details bharein!');
+      return alert('Poori details bharein!');
     }
 
     setIsSubmitting(true);
@@ -369,6 +588,32 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     setIsSubmitting(false);
     setShowCheckout(false);
     setCart([]);
+  };
+
+  // Dukaandar Adds New Item
+  const handleAddNewItemToDukaan = async (e) => {
+    e.preventDefault();
+    if (!newItemName || !newItemPrice) return alert('Item ka naam aur price enter karein!');
+
+    const freshItem = {
+      id: 'p_' + Date.now(),
+      store_id: selectedDukaanStore,
+      name: newItemName,
+      price: Number(newItemPrice),
+      mrp: newItemMrp ? Number(newItemMrp) : Math.round(Number(newItemPrice) * 1.2),
+      unit: newItemUnit || 'Standard Pack',
+      image: newItemImage || PHOTO_PRESETS[0].url,
+      in_stock: true
+    };
+
+    try { await supabase.from('products').insert([freshItem]); } catch {}
+
+    setProducts((prev) => [freshItem, ...prev]);
+    setNewItemName('');
+    setNewItemPrice('');
+    setNewItemMrp('');
+    setNewItemUnit('Standard Pack');
+    alert(`✅ "${freshItem.name}" aapke menu mein live jud gaya!`);
   };
 
   const handleAddStoreSubmit = async (e) => {
@@ -446,7 +691,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 
             <div className="space-y-1.5 text-xs font-extrabold text-slate-800">
               <p className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs">
-                🍰 Shuddh Mithai • 🥛 Doodh-Ghee • 🌾 Kirana • 💊 Dawa
+                🍰 Shuddh Mithai • 🥛 Doodh-Ghee • 🌾 Kirana • 💊 Dawa • 🍎 Taaza Fal
               </p>
               <p className="text-emerald-700 font-black">
                 ✓ Free Delivery ₹149+ Orders Par!
@@ -459,7 +704,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
           </div>
 
           <p className="text-[10px] text-slate-400 print:hidden pt-4">
-            Tip: Iska colour printout nikal kar counter standee par lagayein!
+            Tip: Iska colour printout nikal kar dukaan ke counter par lagayein!
           </p>
         </div>
       )}
@@ -521,9 +766,9 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             {/* Promo Banner */}
             <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 p-4 rounded-2xl text-white shadow-md relative overflow-hidden">
               <div className="relative z-10">
-                <span className="text-[10px] font-extrabold uppercase bg-white/25 px-2 py-0.5 rounded-full tracking-wider">Superfast Local</span>
+                <span className="text-[10px] font-extrabold uppercase bg-white/25 px-2 py-0.5 rounded-full tracking-wider">Superfast Hyperlocal</span>
                 <h2 className="text-xl font-black mt-1">NEPHKA 15-Min Store</h2>
-                <p className="text-xs text-orange-100 font-medium">Shuddh Mithai, Dairy, Dawa & Dukaani Saman</p>
+                <p className="text-xs text-orange-100 font-medium">Mithai, Kirana, Taaza Sabzi & Emergency Dawa</p>
               </div>
               <div className="absolute -right-4 -bottom-6 text-7xl opacity-20 font-black">⚡</div>
             </div>
@@ -549,22 +794,24 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             <div className="space-y-4">
               {stores
                 .filter((st) => activeTab === 'All' || st.category === activeTab)
-                .map((store) => (
-                  <div key={store.id} className="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/80">
-                    <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
-                      <div>
-                        <h3 className="font-extrabold text-sm text-slate-900">{store.name}</h3>
-                        <p className="text-[11px] text-slate-500 font-medium">⭐ {store.rating} • {store.category}</p>
-                      </div>
-                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">
-                        ⏱ {store.delivery_time}
-                      </span>
-                    </div>
+                .map((store) => {
+                  const storeProducts = products.filter((p) => p.store_id === store.id);
+                  if (storeProducts.length === 0) return null;
 
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {products
-                        .filter((p) => p.store_id === store.id)
-                        .map((item) => {
+                  return (
+                    <div key={store.id} className="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/80">
+                      <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+                        <div>
+                          <h3 className="font-extrabold text-sm text-slate-900">{store.name}</h3>
+                          <p className="text-[11px] text-slate-500 font-medium">⭐ {store.rating} • {store.category}</p>
+                        </div>
+                        <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">
+                          ⏱ {store.delivery_time}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {storeProducts.map((item) => {
                           const inCart = cart.find((i) => i.id === item.id);
                           const isOutOfStock = item.in_stock === false;
 
@@ -621,9 +868,10 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                             </div>
                           );
                         })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
 
             {/* Navigation Footer */}
@@ -641,7 +889,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </footer>
           </main>
 
-          {/* Floating Cart Strip (Blinkit Style) */}
+          {/* Floating Cart Strip */}
           {cart.length > 0 && !showCheckout && (
             <div className="fixed bottom-3 left-0 right-0 z-40 px-4">
               <div
@@ -799,7 +1047,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </div>
           )}
 
-          {/* Blinkit Style Live Order Tracking Bar */}
+          {/* Blinkit Style Live Tracking */}
           {trackedOrder && (
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-2xl p-4 max-w-md mx-auto rounded-t-3xl space-y-3">
               <div className="flex justify-between items-center">
@@ -846,7 +1094,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
       )}
 
       {/* ======================================================== */}
-      {/* 3. VIEW: DUKAAN DASHBOARD WITH CONTINUOUS SIREN          */}
+      {/* 3. VIEW: DUKAAN DASHBOARD WITH UNLIMITED ITEM ADDER      */}
       {/* ======================================================== */}
       {currentView === 'dukaan' && (
         <div className="min-h-screen bg-slate-900 text-white p-4 max-w-md mx-auto">
@@ -871,11 +1119,11 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
           <div className="flex justify-between items-center pb-3 border-b border-slate-800">
             <div>
               <h1 className="text-xl font-black text-orange-500">🏪 DUKAAN PARTNER</h1>
-              <p className="text-xs text-slate-400">Live Orders & Stock Control</p>
+              <p className="text-xs text-slate-400">Manage Orders, Stock & Add Items</p>
             </div>
             <div className="flex gap-2">
               <button onClick={() => routeTo('poster')} className="text-xs bg-orange-600 text-white font-bold px-2.5 py-1.5 rounded-lg">
-                🖨️ QR Poster
+                🖨️ Standee
               </button>
               <button onClick={() => routeTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-2.5 py-1.5 rounded-lg border border-slate-700">
                 Exit
@@ -888,136 +1136,215 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               Orders ({orders.filter((o) => o.status !== 'delivered').length})
             </button>
             <button onClick={() => setDukaanTab('menu')} className={`py-2 rounded-lg ${dukaanTab === 'menu' ? 'bg-orange-600 text-white' : 'text-slate-400'}`}>
-              Manage Menu
+              Manage Menu & Add
             </button>
           </div>
 
+          {/* DUKAAN SUB-VIEW 1: ORDERS */}
           {dukaanTab === 'orders' && (
             <div className="space-y-3">
-              {orders.map((ord) => (
-                <div key={ord.id} className="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 text-xs">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-bold text-sm text-white">{ord.customer_name}</h4>
-                      <p className="text-slate-400">📞 {ord.customer_phone}</p>
+              {orders.length === 0 ? (
+                <p className="text-center text-xs text-slate-500 py-10">Koi order pending nahi hai.</p>
+              ) : (
+                orders.map((ord) => (
+                  <div key={ord.id} className="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 text-xs">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-sm text-white">{ord.customer_name}</h4>
+                        <p className="text-slate-400">📞 {ord.customer_phone}</p>
+                      </div>
+                      <span className="font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 uppercase">{ord.status}</span>
                     </div>
-                    <span className="font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 uppercase">{ord.status}</span>
-                  </div>
-                  <p className="text-slate-300">📍 {ord.address}</p>
+                    <p className="text-slate-300">📍 {ord.address}</p>
 
-                  <div className="border-t border-slate-700 pt-2 text-slate-300">
-                    {ord.items?.map((it, idx) => <div key={idx}>{it.name} x {it.qty} (₹{it.price * it.qty})</div>)}
-                    <div className="font-bold text-white pt-1">
-                      Total: ₹{ord.total_amount} ({ord.payment_status})
+                    <div className="border-t border-slate-700 pt-2 text-slate-300">
+                      {ord.items?.map((it, idx) => <div key={idx}>{it.name} x {it.qty} (₹{it.price * it.qty})</div>)}
+                      <div className="font-bold text-white pt-1">
+                        Total: ₹{ord.total_amount} ({ord.payment_status})
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <button
+                        onClick={() => sendWhatsAppReceipt(ord)}
+                        className="py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1"
+                      >
+                        💬 WhatsApp Slip
+                      </button>
+                      {ord.status === 'placed' && (
+                        <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="py-2 bg-orange-600 hover:bg-orange-700 font-bold rounded-lg text-white">
+                          ✓ Accept Order
+                        </button>
+                      )}
+                      {ord.status === 'accepted' && (
+                        <button onClick={() => updateOrderStatus(ord.id, 'out_for_delivery')} className="py-2 bg-blue-600 hover:bg-blue-700 font-bold rounded-lg text-white">
+                          📦 Handover to Rider
+                        </button>
+                      )}
+                      {ord.status === 'out_for_delivery' && (
+                        <span className="py-2 bg-slate-700 text-slate-300 font-bold rounded-lg text-center">
+                          🛵 Out with Rider
+                        </span>
+                      )}
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <button
-                      onClick={() => sendWhatsAppReceipt(ord)}
-                      className="py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1"
-                    >
-                      💬 WhatsApp Slip
-                    </button>
-                    {ord.status === 'placed' && (
-                      <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="py-2 bg-orange-600 hover:bg-orange-700 font-bold rounded-lg text-white">
-                        ✓ Accept Order
-                      </button>
-                    )}
-                    {ord.status === 'accepted' && (
-                      <button onClick={() => updateOrderStatus(ord.id, 'out_for_delivery')} className="py-2 bg-blue-600 hover:bg-blue-700 font-bold rounded-lg text-white">
-                        📦 Handover to Rider
-                      </button>
-                    )}
-                    {ord.status === 'out_for_delivery' && (
-                      <span className="py-2 bg-slate-700 text-slate-300 font-bold rounded-lg text-center">
-                        🛵 Out with Rider
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
 
+          {/* DUKAAN SUB-VIEW 2: UNLIMITED ITEM ADDER & STOCK MANAGER */}
           {dukaanTab === 'menu' && (
             <div className="space-y-4">
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                if (!newItemName || !newItemPrice) return;
-                const freshItem = { 
-                  id: 'p_' + Date.now(), 
-                  store_id: newItemStoreId, 
-                  name: newItemName, 
-                  price: Number(newItemPrice), 
-                  unit: newItemUnit, 
-                  image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400', 
-                  in_stock: true 
-                };
-                try { await supabase.from('products').insert([freshItem]); } catch {}
-                setProducts((prev) => [freshItem, ...prev]);
-                setNewItemName('');
-                setNewItemPrice('');
-                alert('Item menu mein jud gaya!');
-              }} className="bg-slate-800 p-3 rounded-xl space-y-2 text-xs">
-                <p className="font-bold text-slate-300">➕ Add Item to Menu</p>
-                <select
-                  value={newItemStoreId}
-                  onChange={(e) => setNewItemStoreId(e.target.value)}
-                  className="w-full p-2 rounded bg-slate-900 border border-slate-700 text-white font-medium"
-                >
-                  {stores.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  placeholder="Item Name (e.g. Rasgulla, Bread)"
-                  required
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  className="w-full p-2 rounded bg-slate-900 border border-slate-700 text-white"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="number"
-                    placeholder="Price (₹)"
-                    required
-                    value={newItemPrice}
-                    onChange={(e) => setNewItemPrice(e.target.value)}
-                    className="w-full p-2 rounded bg-slate-900 border border-slate-700 text-white"
-                  />
+              {/* Add Custom Item Box */}
+              <form onSubmit={handleAddNewItemToDukaan} className="bg-slate-800 p-3.5 rounded-2xl space-y-2.5 text-xs border border-slate-700 shadow-md">
+                <div className="flex justify-between items-center">
+                  <p className="font-black text-sm text-orange-400">➕ Add Unlimited Item With Photo</p>
+                  <span className="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-bold">Quick Stock</span>
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Dukaan Chunein:</label>
+                  <select
+                    value={selectedDukaanStore}
+                    onChange={(e) => setSelectedDukaanStore(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-semibold outline-none"
+                  >
+                    {stores.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name} ({s.category})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Item Ka Naam:</label>
                   <input
                     type="text"
-                    placeholder="Unit (e.g. 500g / 1pc)"
-                    value={newItemUnit}
-                    onChange={(e) => setNewItemUnit(e.target.value)}
-                    className="w-full p-2 rounded bg-slate-900 border border-slate-700 text-white"
+                    placeholder="e.g. Kesar Peda / Fortune Chakki Atta / Paracetamol"
+                    required
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
                   />
                 </div>
-                <button type="submit" className="w-full py-2 bg-orange-600 font-bold rounded">Save Item</button>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-slate-400 block mb-1">Price (₹):</label>
+                    <input
+                      type="number"
+                      placeholder="80"
+                      required
+                      value={newItemPrice}
+                      onChange={(e) => setNewItemPrice(e.target.value)}
+                      className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-slate-400 block mb-1">MRP (₹):</label>
+                    <input
+                      type="number"
+                      placeholder="100"
+                      value={newItemMrp}
+                      onChange={(e) => setNewItemMrp(e.target.value)}
+                      className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-slate-400 block mb-1">Unit:</label>
+                    <input
+                      type="text"
+                      placeholder="500g / 1pc"
+                      value={newItemUnit}
+                      onChange={(e) => setNewItemUnit(e.target.value)}
+                      className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* 1-Tap Photo Preset Picker */}
+                <div>
+                  <label className="text-slate-400 block mb-1">1-Tap Real Photo Chunein:</label>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                    {PHOTO_PRESETS.map((pst, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setNewItemImage(pst.url)}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition border ${
+                          newItemImage === pst.url 
+                            ? 'bg-orange-600 text-white border-orange-500 shadow-sm' 
+                            : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500'
+                        }`}
+                      >
+                        {pst.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Ya Photo URL Paste Karein:</label>
+                  <input
+                    type="url"
+                    placeholder="https://images.unsplash.com/..."
+                    value={newItemImage}
+                    onChange={(e) => setNewItemImage(e.target.value)}
+                    className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-[11px] outline-none"
+                  />
+                </div>
+
+                <button type="submit" className="w-full py-3 bg-orange-600 hover:bg-orange-700 font-black rounded-xl text-xs shadow-md transition">
+                  Menu Mein Save Karein
+                </button>
               </form>
 
+              {/* Items List Filtered by Current Selected Store */}
               <div className="space-y-2">
-                {products.map((item) => (
-                  <div key={item.id} className="bg-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs">
-                    <div>
-                      <p className="font-bold text-white">{item.name}</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-orange-400 font-bold">₹{item.price}</span>
-                        <button onClick={() => modifyProductPrice(item.id)} className="text-[10px] text-blue-400 underline">
-                          Edit Price
+                <div className="flex justify-between items-center px-1">
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">
+                    Live Stock ({products.filter((p) => p.store_id === selectedDukaanStore).length} Items)
+                  </h3>
+                  <span className="text-[10px] text-slate-500">Tap to Toggle Stock</span>
+                </div>
+
+                {products
+                  .filter((p) => p.store_id === selectedDukaanStore)
+                  .map((item) => (
+                    <div key={item.id} className="bg-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs border border-slate-700/60 shadow-xs">
+                      <div className="flex items-center gap-2.5">
+                        <img src={item.image} alt={item.name} className="w-11 h-11 rounded-lg object-cover border border-slate-700" />
+                        <div>
+                          <p className="font-bold text-white line-clamp-1">{item.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-orange-400 font-bold">₹{item.price}</span>
+                            <span className="text-slate-400 text-[10px]">{item.unit}</span>
+                            <button onClick={() => modifyProductPrice(item.id)} className="text-[10px] text-blue-400 underline font-semibold">
+                              Price
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => toggleProductStock(item.id, item.in_stock)}
+                          className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition ${
+                            item.in_stock !== false ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+                          }`}
+                        >
+                          {item.in_stock !== false ? 'In Stock' : 'Out'}
+                        </button>
+                        <button
+                          onClick={() => deleteProduct(item.id)}
+                          className="px-2 py-1 rounded-lg bg-slate-700 hover:bg-rose-900 text-slate-300 font-bold text-[11px]"
+                          title="Delete Item"
+                        >
+                          🗑
                         </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => toggleProductStock(item.id, item.in_stock)}
-                      className={`px-2.5 py-1 rounded font-bold ${item.in_stock !== false ? 'bg-emerald-600' : 'bg-rose-600'}`}
-                    >
-                      {item.in_stock !== false ? 'In Stock' : 'Out of Stock'}
-                    </button>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           )}
@@ -1036,7 +1363,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </div>
             <div className="flex gap-2">
               <button onClick={() => routeTo('poster')} className="text-xs bg-orange-600 text-white font-bold px-2.5 py-1.5 rounded-lg">
-                🖨️ QR Poster
+                🖨️ Standee
               </button>
               <button onClick={() => routeTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-2.5 py-1.5 rounded-lg border border-slate-700">
                 Exit
@@ -1055,7 +1382,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </div>
           </div>
 
-          {/* ADMIN PAYMENT & SUPPORT PHONE CONFIGURATION */}
+          {/* Business & UPI Settings */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3">
             <h3 className="font-black text-xs uppercase tracking-wider text-emerald-400">⚙️ Live Business & UPI Settings</h3>
             <form onSubmit={handleSaveSettings} className="space-y-2.5 text-xs">
@@ -1094,7 +1421,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </form>
           </div>
 
-          {/* STORE ONBOARDING FORM */}
+          {/* Store Onboarding Form */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3">
             <div className="flex justify-between items-center">
               <h3 className="font-black text-xs uppercase tracking-wider text-amber-400">➕ Onboard New Local Store</h3>
