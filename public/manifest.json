@@ -1,0 +1,22 @@
+{
+  "short_name": "NEPHKA",
+  "name": "NEPHKA - 15 Min Delivery",
+  "description": "Hyperlocal 15-Minute Local Delivery Platform",
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#ea580c",
+  "display": "standalone",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3081/3081986.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3081/3081986.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

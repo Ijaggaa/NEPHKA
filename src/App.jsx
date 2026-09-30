@@ -72,11 +72,14 @@ const DEFAULT_PRODUCTS = [
 const ADMIN_UPI_ID = 'nephka@upi';
 
 export default function App() {
-  // Navigation Routing without third-party crashes
-  const [currentView, setCurrentView] = useState('customer'); // 'customer', 'dukaan', 'admin', 'rider'
+  const [currentView, setCurrentView] = useState('customer');
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
+
+  // PWA Install prompt state
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   // Customer State
   const [cart, setCart] = useState([]);
@@ -97,8 +100,29 @@ export default function App() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
 
-  // Initial URL check (nephka.com/dukaan, nephka.com/admin, nephka.com/rider)
   useEffect(() => {
+    // 1. PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
+    // 2. Dynamic Manifest Link Check
+    if (!document.querySelector('link[rel="manifest"]')) {
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = '/manifest.json';
+      document.head.appendChild(manifestLink);
+    }
+
+    // 3. Listen for Android PWA Install Event
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBanner(true);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+    // 4. URL Navigation Check
     const p = window.location.pathname.toLowerCase();
     const h = window.location.hash.toLowerCase();
     if (p.includes('dukaan') || h.includes('dukaan')) setCurrentView('dukaan');
@@ -106,6 +130,7 @@ export default function App() {
     else if (p.includes('rider') || h.includes('rider')) setCurrentView('rider');
     else setCurrentView('customer');
 
+    // 5. Initial Data Load
     const loadData = async () => {
       try {
         const { data: pData } = await supabase.from('products').select('*');
@@ -128,9 +153,24 @@ export default function App() {
       .subscribe();
 
     return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          setShowInstallBanner(false);
+        }
+        setDeferredPrompt(null);
+      });
+    } else {
+      alert('iPhone ya Safari par app install karne ke liye: Share icon (⎋) dabayein aur "Add to Home Screen" par tap karein.');
+    }
+  };
 
   const navigateTo = (viewName) => {
     setCurrentView(viewName);
@@ -148,9 +188,8 @@ export default function App() {
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, in_stock: !curr } : p)));
   };
 
-  // Location Detector
   const detectLiveLocation = () => {
-    if (!navigator.geolocation) return alert('GPS browser mein support nahi karta.');
+    if (!navigator.geolocation) return alert('GPS support nahi mila.');
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -174,7 +213,6 @@ export default function App() {
     );
   };
 
-  // Cart logic
   const addToCart = (product) => {
     if (product.in_stock === false) return;
     setCart((prev) => {
@@ -228,18 +266,38 @@ export default function App() {
 
   const currentOrder = orders.find((o) => o.id === activeOrderId);
   const step = currentOrder?.status === 'delivered' ? 4 : currentOrder?.status === 'out_for_delivery' ? 3 : currentOrder?.status === 'accepted' ? 2 : 1;
-
-  // Total Business analytics for Admin
   const totalRevenue = orders.reduce((acc, o) => acc + Number(o.total_amount || 0), 0);
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-20 font-sans select-none">
       
-      {/* ======================================================== */}
-      {/* 1. VIEW: PURE BLINKIT CUSTOMER APP                       */}
-      {/* ======================================================== */}
+      {/* 1. CUSTOMER VIEW */}
       {currentView === 'customer' && (
         <div>
+          {/* In-App PWA Install Banner */}
+          {showInstallBanner && (
+            <div className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-4 py-2.5 flex items-center justify-between text-xs font-bold shadow-md">
+              <div className="flex items-center gap-2">
+                <span className="text-base">📲</span>
+                <span>Install NEPHKA App for 1-Tap Access</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleInstallClick}
+                  className="bg-white text-orange-600 px-3 py-1 rounded-lg font-black shadow-xs hover:bg-orange-50 active:scale-95 transition"
+                >
+                  Install
+                </button>
+                <button
+                  onClick={() => setShowInstallBanner(false)}
+                  className="text-white/80 hover:text-white px-1"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Top Quick Bar */}
           <header className="sticky top-0 z-40 bg-white shadow-sm border-b px-4 py-3">
             <div className="max-w-md mx-auto flex items-center justify-between">
@@ -252,17 +310,25 @@ export default function App() {
                     <span className="text-xs font-black uppercase text-slate-900">Delivery in</span>
                     <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">⚡ 12 MINS</span>
                   </div>
-                  <p className="text-[11px] text-slate-500 font-medium truncate max-w-[200px]">
+                  <p className="text-[11px] text-slate-500 font-medium truncate max-w-[190px]">
                     {address ? address : 'Tap GPS for 1-Click Address'}
                   </p>
                 </div>
               </div>
-              <button
-                onClick={detectLiveLocation}
-                className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition"
-              >
-                {isLocating ? '...' : '📍 GPS'}
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={detectLiveLocation}
+                  className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition"
+                >
+                  {isLocating ? '...' : '📍 GPS'}
+                </button>
+                <button
+                  onClick={handleInstallClick}
+                  className="text-[11px] bg-orange-50 text-orange-600 border border-orange-200 font-bold px-2 py-1.5 rounded-lg active:scale-95 transition"
+                >
+                  📲 App
+                </button>
+              </div>
             </div>
           </header>
 
@@ -378,7 +444,6 @@ export default function App() {
                 ))}
             </div>
 
-            {/* Subtle Footer for Staff / Dukaan / Admin / Rider navigation */}
             <footer className="text-center pt-8 pb-4 space-y-2">
               <p className="text-[11px] text-slate-400 font-semibold">NEPHKA Hyperlocal Superfast Platform</p>
               <div className="flex justify-center gap-3 text-[11px] text-slate-400 font-medium">
@@ -391,7 +456,7 @@ export default function App() {
             </footer>
           </main>
 
-          {/* Floating Cart Bar (Blinkit Style) */}
+          {/* Floating Cart Bar */}
           {cart.length > 0 && !showCheckout && (
             <div className="fixed bottom-3 left-0 right-0 z-40 px-4">
               <div
@@ -481,7 +546,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Live Order Tracking Bar (Blinkit Style) */}
+          {/* Live Order Tracking Bar */}
           {currentOrder && (
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-2xl p-4 max-w-md mx-auto rounded-t-3xl space-y-3">
               <div className="flex justify-between items-center">
@@ -521,9 +586,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* 2. VIEW: DUKAAN DASHBOARD                                */}
-      {/* ======================================================== */}
+      {/* 2. DUKAAN VIEW */}
       {currentView === 'dukaan' && (
         <div className="min-h-screen bg-slate-900 text-white p-4 max-w-md mx-auto">
           <div className="flex justify-between items-center pb-3 border-b border-slate-800">
@@ -612,9 +675,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* 3. VIEW: MASTER ADMIN APP                                */}
-      {/* ======================================================== */}
+      {/* 3. ADMIN VIEW */}
       {currentView === 'admin' && (
         <div className="min-h-screen bg-slate-950 text-white p-4 max-w-md mx-auto">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -646,9 +707,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* 4. VIEW: RIDER APP                                       */}
-      {/* ======================================================== */}
+      {/* 4. RIDER VIEW */}
       {currentView === 'rider' && (
         <div className="min-h-screen bg-slate-900 text-white p-4 max-w-md mx-auto">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
