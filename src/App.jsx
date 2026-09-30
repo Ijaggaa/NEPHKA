@@ -7,16 +7,17 @@ const DEFAULT_STORES = [
 ];
 
 const DEFAULT_PRODUCTS = [
-  { id: 'p1', store_id: 'store-1', name: 'Desi Ghee Jalebi & Rabri', price: 80, description: 'Garma-garam kurkuri jalebi with malai rabri' },
-  { id: 'p2', store_id: 'store-1', name: 'Samosa Chatni (2 Pcs)', price: 30, description: 'Aloo matar special with meethi chatni' },
-  { id: 'p3', store_id: 'store-1', name: 'Chole Bhature Special', price: 90, description: 'Amritsari style paneer wale bhature' },
-  { id: 'p4', store_id: 'store-2', name: 'Fresh Cow Milk (1 Litre)', price: 65, description: 'Sudh taaza doodh roz subah' },
-  { id: 'p5', store_id: 'store-2', name: 'Fortune Chakki Fresh Atta (5kg)', price: 210, description: '100% Shudh Sharbati Gehu' },
-  { id: 'p6', store_id: 'store-2', name: 'Amul Butter (100g)', price: 58, description: 'Pasteurized table butter' }
+  { id: 'p1', store_id: 'store-1', name: 'Desi Ghee Jalebi & Rabri', price: 80, description: 'Garma-garam kurkuri jalebi with malai rabri', in_stock: true },
+  { id: 'p2', store_id: 'store-1', name: 'Samosa Chatni (2 Pcs)', price: 30, description: 'Aloo matar special with meethi chatni', in_stock: true },
+  { id: 'p3', store_id: 'store-1', name: 'Chole Bhature Special', price: 90, description: 'Amritsari style paneer wale bhature', in_stock: true },
+  { id: 'p4', store_id: 'store-2', name: 'Fresh Cow Milk (1 Litre)', price: 65, description: 'Sudh taaza doodh roz subah', in_stock: true },
+  { id: 'p5', store_id: 'store-2', name: 'Fortune Chakki Fresh Atta (5kg)', price: 210, description: '100% Shudh Sharbati Gehu', in_stock: true },
+  { id: 'p6', store_id: 'store-2', name: 'Amul Butter (100g)', price: 58, description: 'Pasteurized table butter', in_stock: true }
 ];
 
 export default function App() {
   const [view, setView] = useState('customer'); // 'customer', 'dukaan', 'rider'
+  const [dukaanTab, setDukaanTab] = useState('orders'); // 'orders', 'inventory'
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [cart, setCart] = useState([]);
@@ -26,6 +27,11 @@ export default function App() {
   const [address, setAddress] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('All');
+
+  // Form states for adding new product
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemPrice, setNewItemPrice] = useState('');
+  const [newItemStoreId, setNewItemStoreId] = useState('store-1');
 
   const playAlert = () => {
     try {
@@ -37,6 +43,9 @@ export default function App() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        const { data: prData } = await supabase.from('products').select('*');
+        if (prData && prData.length > 0) setProducts(prData);
+
         const { data: ordData } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
         if (ordData) setOrders(ordData);
       } catch (err) {
@@ -46,7 +55,6 @@ export default function App() {
 
     loadData();
 
-    // Live Real-Time Subscription
     const channel = supabase
       .channel('realtime_orders')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
@@ -64,7 +72,9 @@ export default function App() {
     };
   }, []);
 
+  // Cart operations
   const addToCart = (product) => {
+    if (product.in_stock === false) return;
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
@@ -82,6 +92,7 @@ export default function App() {
 
   const totalCartAmount = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
 
+  // Order Placement
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (cart.length === 0) return alert('Pehle cart mein item jodein!');
@@ -116,8 +127,51 @@ export default function App() {
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)));
   };
 
+  // Inventory Management Handlers
+  const toggleStock = async (prodId, currentStatus) => {
+    const updatedStatus = !currentStatus;
+    try {
+      await supabase.from('products').update({ in_stock: updatedStatus }).eq('id', prodId);
+    } catch (e) {}
+    setProducts((prev) => prev.map((p) => (p.id === prodId ? { ...p, in_stock: updatedStatus } : p)));
+  };
+
+  const updatePrice = async (prodId) => {
+    const newPrice = prompt('Naya Price (₹) enter karein:');
+    if (!newPrice || isNaN(newPrice)) return;
+    const priceNum = Number(newPrice);
+    try {
+      await supabase.from('products').update({ price: priceNum }).eq('id', prodId);
+    } catch (e) {}
+    setProducts((prev) => prev.map((p) => (p.id === prodId ? { ...p, price: priceNum } : p)));
+  };
+
+  const handleAddNewProduct = async (e) => {
+    e.preventDefault();
+    if (!newItemName || !newItemPrice) return alert('Item ka naam aur price daalein!');
+
+    const newProd = {
+      id: 'prod_' + Date.now(),
+      store_id: newItemStoreId,
+      name: newItemName,
+      price: Number(newItemPrice),
+      description: 'Taaza aur badhiya quality',
+      in_stock: true
+    };
+
+    try {
+      await supabase.from('products').insert([newProd]);
+    } catch (e) {}
+
+    setProducts((prev) => [newProd, ...prev]);
+    setNewItemName('');
+    setNewItemPrice('');
+    alert('✅ Naya item menu mein jud gaya!');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
+      {/* Top Header */}
       <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <div>
@@ -132,6 +186,7 @@ export default function App() {
         </div>
       </header>
 
+      {/* VIEW 1: CUSTOMER VIEW */}
       {view === 'customer' && (
         <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
           <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-4 rounded-2xl text-white shadow-lg">
@@ -140,6 +195,7 @@ export default function App() {
             <p className="text-xs opacity-90">Mithai, Samosa, Kirana ya Dawa — 20 min mein ghar pe.</p>
           </div>
 
+          {/* Categories */}
           <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-semibold">
             {['All', 'Sweets & Snacks', 'Kirana & Milk'].map((cat) => (
               <button
@@ -152,6 +208,7 @@ export default function App() {
             ))}
           </div>
 
+          {/* Stores & Products List */}
           <div className="space-y-4">
             {stores
               .filter((st) => activeTab === 'All' || st.category === activeTab)
@@ -172,13 +229,20 @@ export default function App() {
                       .filter((p) => p.store_id === store.id)
                       .map((product) => {
                         const inCart = cart.find((i) => i.id === product.id);
+                        const isOutOfStock = product.in_stock === false;
+
                         return (
-                          <div key={product.id} className="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100 last:border-0">
+                          <div key={product.id} className={`flex justify-between items-center py-2 border-b border-dashed border-slate-100 last:border-0 ${isOutOfStock ? 'opacity-50' : ''}`}>
                             <div>
                               <p className="text-sm font-semibold text-slate-800">{product.name}</p>
                               <p className="text-xs font-bold text-orange-600">₹{product.price}</p>
                             </div>
-                            {inCart ? (
+
+                            {isOutOfStock ? (
+                              <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md">
+                                Out of Stock
+                              </span>
+                            ) : inCart ? (
                               <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-2 py-1">
                                 <button onClick={() => removeFromCart(product.id)} className="font-bold text-orange-600 px-1">-</button>
                                 <span className="text-xs font-bold">{inCart.qty}</span>
@@ -197,6 +261,7 @@ export default function App() {
               ))}
           </div>
 
+          {/* Cart & Checkout */}
           {cart.length > 0 && (
             <div className="bg-white rounded-2xl p-4 shadow-xl border border-orange-100 space-y-3">
               <h3 className="font-bold text-sm text-slate-800 border-b pb-2">Delivery Details & Bill (₹{totalCartAmount})</h3>
@@ -238,58 +303,160 @@ export default function App() {
         </main>
       )}
 
+      {/* VIEW 2: DUKAAN PANEL (Orders & Inventory) */}
       {view === 'dukaan' && (
         <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
-          <div className="bg-slate-900 text-white p-4 rounded-2xl">
-            <h2 className="font-bold text-lg">🏪 Dukaan Live Order Panel</h2>
-            <p className="text-xs text-slate-400">Naye order aane par yahan chime sound bajegi</p>
+          <div className="bg-slate-900 text-white p-4 rounded-2xl space-y-3">
+            <div className="flex justify-between items-center">
+              <h2 className="font-bold text-lg">🏪 Dukaan Dashboard</h2>
+              <span className="text-xs bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-md">Live Store</span>
+            </div>
+            
+            {/* Dukaan Sub Tabs */}
+            <div className="grid grid-cols-2 bg-slate-800 p-1 rounded-xl text-xs font-bold gap-1">
+              <button
+                onClick={() => setDukaanTab('orders')}
+                className={`py-2 rounded-lg transition ${dukaanTab === 'orders' ? 'bg-orange-600 text-white' : 'text-slate-400'}`}
+              >
+                Live Orders ({orders.filter((o) => o.status !== 'delivered').length})
+              </button>
+              <button
+                onClick={() => setDukaanTab('inventory')}
+                className={`py-2 rounded-lg transition ${dukaanTab === 'inventory' ? 'bg-orange-600 text-white' : 'text-slate-400'}`}
+              >
+                Manage Stock / Menu
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            {orders.length === 0 ? (
-              <p className="text-center text-xs text-slate-400 py-8">Koi order nahi aaya abhi tak.</p>
-            ) : (
-              orders.map((ord) => (
-                <div key={ord.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-bold text-sm">{ord.customer_name}</h4>
-                      <p className="text-xs text-slate-500">📞 {ord.customer_phone}</p>
-                      <p className="text-xs text-slate-600 mt-1">📍 {ord.address}</p>
-                    </div>
-                    <span className="text-xs font-bold px-2 py-1 rounded-md bg-amber-100 text-amber-800 uppercase">{ord.status}</span>
-                  </div>
-
-                  <div className="border-t border-dashed pt-2">
-                    {ord.items.map((it, idx) => (
-                      <div key={idx} className="flex justify-between text-xs text-slate-700">
-                        <span>{it.name} x {it.qty}</span>
-                        <span>₹{it.price * it.qty}</span>
+          {/* DUKAAN SUB-TAB 1: LIVE ORDERS */}
+          {dukaanTab === 'orders' && (
+            <div className="space-y-3">
+              {orders.length === 0 ? (
+                <p className="text-center text-xs text-slate-400 py-8">Koi order nahi aaya abhi tak.</p>
+              ) : (
+                orders.map((ord) => (
+                  <div key={ord.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-sm">{ord.customer_name}</h4>
+                        <p className="text-xs text-slate-500">📞 {ord.customer_phone}</p>
+                        <p className="text-xs text-slate-600 mt-1">📍 {ord.address}</p>
                       </div>
-                    ))}
-                    <div className="flex justify-between font-bold text-xs pt-1 border-t mt-1">
-                      <span>Total</span>
-                      <span>₹{ord.total_amount}</span>
+                      <span className="text-xs font-bold px-2 py-1 rounded-md bg-amber-100 text-amber-800 uppercase">{ord.status}</span>
                     </div>
-                  </div>
 
-                  {ord.status === 'placed' && (
-                    <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-bold">
-                      Order Sweekar Karein (Accept)
-                    </button>
-                  )}
-                  {ord.status === 'accepted' && (
-                    <button onClick={() => updateOrderStatus(ord.id, 'out_for_delivery')} className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold">
-                      Packing Poori & Rider Ko Saunpein
-                    </button>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
+                    <div className="border-t border-dashed pt-2">
+                      {ord.items.map((it, idx) => (
+                        <div key={idx} className="flex justify-between text-xs text-slate-700">
+                          <span>{it.name} x {it.qty}</span>
+                          <span>₹{it.price * it.qty}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between font-bold text-xs pt-1 border-t mt-1">
+                        <span>Total</span>
+                        <span>₹{ord.total_amount}</span>
+                      </div>
+                    </div>
+
+                    {ord.status === 'placed' && (
+                      <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-bold">
+                        Order Sweekar Karein (Accept)
+                      </button>
+                    )}
+                    {ord.status === 'accepted' && (
+                      <button onClick={() => updateOrderStatus(ord.id, 'out_for_delivery')} className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold">
+                        Packing Poori & Rider Ko Saunpein
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* DUKAAN SUB-TAB 2: INVENTORY & STOCK MANAGER */}
+          {dukaanTab === 'inventory' && (
+            <div className="space-y-4">
+              {/* Add New Product Box */}
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700">➕ Naya Item Menu Mein Jodein</h3>
+                <form onSubmit={handleAddNewProduct} className="space-y-2 text-xs">
+                  <select
+                    value={newItemStoreId}
+                    onChange={(e) => setNewItemStoreId(e.target.value)}
+                    className="w-full p-2 rounded-lg border bg-slate-50 font-medium"
+                  >
+                    {stores.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Item ka Naam (e.g. Rasgulla, Bread, Maggi)"
+                    required
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border outline-none"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Price (₹)"
+                    required
+                    value={newItemPrice}
+                    onChange={(e) => setNewItemPrice(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg transition"
+                  >
+                    Menu Mein Save Karein
+                  </button>
+                </form>
+              </div>
+
+              {/* Items List with Live Stock & Price Edit */}
+              <div className="space-y-2">
+                <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 px-1">Live Stock & Rates</h3>
+                {products.map((item) => {
+                  const isAvailable = item.in_stock !== false;
+                  return (
+                    <div key={item.id} className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
+                      <div>
+                        <p className="font-bold text-sm text-slate-800">{item.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs font-extrabold text-orange-600">₹{item.price}</span>
+                          <button
+                            onClick={() => updatePrice(item.id)}
+                            className="text-[10px] text-blue-600 underline font-semibold"
+                          >
+                            Price Badlein
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Stock Switch Toggle Button */}
+                      <button
+                        onClick={() => toggleStock(item.id, isAvailable)}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition border ${
+                          isAvailable
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                            : 'bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100'
+                        }`}
+                      >
+                        {isAvailable ? '✅ In Stock' : '❌ Out of Stock'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </main>
       )}
 
+      {/* VIEW 3: RIDER PARTNER PANEL */}
       {view === 'rider' && (
         <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
           <div className="bg-emerald-900 text-white p-4 rounded-2xl">
