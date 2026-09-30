@@ -69,19 +69,21 @@ const DEFAULT_PRODUCTS = [
   }
 ];
 
-const ADMIN_UPI_ID = 'nephka@upi';
+// ==========================================
+// CONFIGURATION (Yahan apna asli UPI ID daalein)
+// ==========================================
+const ADMIN_UPI_ID = 'nephka@upi'; // Apna PhonePe / GPay UPI ID yahan daal sakte hain
+const STORE_SUPPORT_PHONE = '919999999999';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('customer');
+  const [currentView, setCurrentView] = useState('customer'); // 'customer', 'dukaan', 'admin', 'rider', 'poster'
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
 
-  // PWA Install State
+  // PWA & Siren State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
-
-  // Siren Audio Ref
   const sirenAudioRef = useRef(null);
   const [isSirenMuted, setIsSirenMuted] = useState(false);
 
@@ -110,7 +112,22 @@ export default function App() {
   const [newStoreTime, setNewStoreTime] = useState('15-20 min');
   const [newStoreRating, setNewStoreRating] = useState('4.8');
 
-  // WhatsApp Message Generator
+  // ==========================================
+  // PRICING & DELIVERY FEE LOGIC
+  // ==========================================
+  const itemTotal = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
+  const totalCartCount = cart.reduce((acc, i) => acc + i.qty, 0);
+  const totalSavings = cart.reduce((acc, i) => acc + ((i.mrp || i.price) - i.price) * i.qty, 0);
+  
+  // Delivery Fee: ₹20 if under ₹149, else FREE (₹0)
+  const deliveryFee = itemTotal === 0 || itemTotal >= 149 ? 0 : 20;
+  const platformFee = itemTotal > 0 ? 3 : 0;
+  const finalTotalAmount = itemTotal + deliveryFee + platformFee;
+
+  const upiUrl = `upi://pay?pa=${ADMIN_UPI_ID}&pn=NEPHKA&am=${finalTotalAmount}&cu=INR&tn=QuickOrder`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiUrl)}`;
+  const websiteQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent('https://nephka.com')}`;
+
   const sendWhatsAppReceipt = (ord) => {
     const mapUrl = ord.lat && ord.lng 
       ? `https://maps.google.com/?q=${ord.lat},${ord.lng}` 
@@ -127,11 +144,14 @@ export default function App() {
 ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i.qty}`).join('\n')}
 
 ━━━━━━━━━━━━━━━━━━
+💵 Items Subtotal: ₹${ord.item_subtotal || ord.total_amount}
+🛵 Delivery Fee: ${ord.delivery_fee === 0 ? 'FREE' : '₹' + ord.delivery_fee}
+⚙️ Platform Fee: ₹${ord.platform_fee || 0}
 💰 *TOTAL BILL:* ₹${ord.total_amount}
 💳 *PAYMENT:* ${ord.payment_status} (${ord.payment_method})
-🗺️ *MAP LOCATION:* ${mapUrl}
+🗺️ *MAP PIN:* ${mapUrl}
 ━━━━━━━━━━━━━━━━━━
-*Nephka - Fast Local Delivery*`;
+*Nephka - 15 Min Local Delivery*`;
 
     const cleanPhone = ord.customer_phone.replace(/[^0-9]/g, '');
     const phoneWithCode = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
@@ -139,11 +159,9 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
   };
 
   useEffect(() => {
-    // 1. Audio Setup for Dukaan Siren
     sirenAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     sirenAudioRef.current.loop = true;
 
-    // 2. PWA Auto Setup
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
     if (!document.querySelector('link[rel="manifest"]')) {
       const manifestLink = document.createElement('link');
@@ -158,15 +176,14 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-    // 3. Navigation check
     const p = window.location.pathname.toLowerCase();
     const h = window.location.hash.toLowerCase();
-    if (p.includes('dukaan') || h.includes('dukaan')) setCurrentView('dukaan');
+    if (p.includes('poster') || h.includes('poster')) setCurrentView('poster');
+    else if (p.includes('dukaan') || h.includes('dukaan')) setCurrentView('dukaan');
     else if (p.includes('admin') || h.includes('admin')) setCurrentView('admin');
     else if (p.includes('rider') || h.includes('rider')) setCurrentView('rider');
     else setCurrentView('customer');
 
-    // 4. Initial load from Supabase
     const loadData = async () => {
       try {
         const { data: sData } = await supabase.from('stores').select('*');
@@ -199,7 +216,6 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
     };
   }, []);
 
-  // Continuous Siren Controller for Dukaan Panel
   const pendingOrdersCount = orders.filter((o) => o.status === 'placed').length;
   useEffect(() => {
     if (currentView === 'dukaan' && pendingOrdersCount > 0 && !isSirenMuted) {
@@ -275,13 +291,6 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
     setCart((prev) => prev.map((i) => (i.id === id ? { ...i, qty: i.qty - 1 } : i)).filter((i) => i.qty > 0));
   };
 
-  const totalCartCount = cart.reduce((acc, i) => acc + i.qty, 0);
-  const totalCartAmount = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
-  const totalSavings = cart.reduce((acc, i) => acc + ((i.mrp || i.price) - i.price) * i.qty, 0);
-
-  const upiUrl = `upi://pay?pa=${ADMIN_UPI_ID}&pn=NEPHKA&am=${totalCartAmount}&cu=INR&tn=QuickOrder`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiUrl)}`;
-
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (cart.length === 0 || !customerName || !customerPhone || !address) return alert('Poori details bharein!');
@@ -295,7 +304,10 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
       lat: coords?.lat || null,
       lng: coords?.lng || null,
       items: cart,
-      total_amount: totalCartAmount,
+      item_subtotal: itemTotal,
+      delivery_fee: deliveryFee,
+      platform_fee: platformFee,
+      total_amount: finalTotalAmount,
       status: 'placed',
       payment_method: paymentMethod === 'upi' ? 'UPI Online' : 'Cash on Delivery',
       payment_status: paymentMethod === 'upi' ? 'Paid (UPI)' : 'Cash to Collect',
@@ -341,6 +353,64 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-20 font-sans select-none">
       
+      {/* ======================================================== */}
+      {/* VIEW: PRINTABLE DUKAAN COUNTER STANDEE / POSTER          */}
+      {/* ======================================================== */}
+      {currentView === 'poster' && (
+        <div className="min-h-screen bg-white text-slate-900 p-6 max-w-lg mx-auto flex flex-col justify-between items-center text-center">
+          <div className="w-full flex justify-between items-center print:hidden pb-4 border-b">
+            <button onClick={() => navigateTo('customer')} className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">
+              ✕ Back to App
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="text-xs font-black bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl shadow-md flex items-center gap-1.5"
+            >
+              🖨️ Print Poster (A4)
+            </button>
+          </div>
+
+          <div className="my-auto py-6 border-4 border-orange-600 rounded-3xl p-6 w-full shadow-xl bg-gradient-to-b from-orange-50/50 to-white">
+            <div className="inline-block bg-orange-600 text-white font-black text-xl px-4 py-1.5 rounded-2xl tracking-wider mb-2">
+              NEPHKA
+            </div>
+            <h1 className="text-3xl font-black text-slate-900 leading-tight">
+              Ab Dukaan Seedha <br />
+              <span className="text-orange-600">Aapke Ghar Pe!</span>
+            </h1>
+            <p className="text-sm font-bold text-slate-600 mt-1">
+              ⚡ 15-20 Min Superfast Local Delivery
+            </p>
+
+            <div className="my-5 flex flex-col items-center">
+              <div className="p-3 bg-white border-4 border-slate-900 rounded-3xl shadow-lg">
+                <img src={websiteQrUrl} alt="Scan to Order" className="w-52 h-52 object-contain" />
+              </div>
+              <p className="text-xs font-black uppercase tracking-wider text-slate-700 mt-2 bg-yellow-300 px-3 py-1 rounded-full">
+                📸 Phone Camera Se Scan Karein
+              </p>
+            </div>
+
+            <div className="space-y-1.5 text-xs font-extrabold text-slate-800">
+              <p className="bg-white p-2 rounded-xl border border-slate-200 shadow-xs">
+                🍰 Mithai • 🥛 Shuddh Doodh • 🌾 Kirana • 💊 Dawa
+              </p>
+              <p className="text-emerald-700 font-black">
+                ✓ Free Delivery ₹149+ Orders Par!
+              </p>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-dashed border-slate-300 text-[11px] text-slate-500 font-semibold">
+              Visit Online: <span className="font-bold text-orange-600 text-xs">nephka.com</span>
+            </div>
+          </div>
+
+          <p className="text-[10px] text-slate-400 print:hidden pt-4">
+            Tip: A4 size glossy paper par print karke counter ya showcase par lagayein!
+          </p>
+        </div>
+      )}
+
       {/* ======================================================== */}
       {/* 1. CUSTOMER VIEW                                         */}
       {/* ======================================================== */}
@@ -483,48 +553,73 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
                 <button onClick={() => navigateTo('rider')} className="hover:underline">🛵 Rider Panel</button>
                 <span>•</span>
                 <button onClick={() => navigateTo('admin')} className="hover:underline">👑 Master Admin</button>
+                <span>•</span>
+                <button onClick={() => navigateTo('poster')} className="hover:underline text-orange-500 font-bold">🖨️ QR Poster</button>
               </div>
             </footer>
           </main>
 
+          {/* Floating Cart Bar */}
           {cart.length > 0 && !showCheckout && (
             <div className="fixed bottom-3 left-0 right-0 z-40 px-4">
               <div onClick={() => setShowCheckout(true)} className="max-w-md mx-auto bg-emerald-600 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500">
                 <div className="flex items-center gap-3">
                   <div className="bg-emerald-800 text-white font-black text-xs px-2.5 py-1.5 rounded-xl">🛒 {totalCartCount} ITEMS</div>
                   <div>
-                    <p className="text-sm font-black leading-tight">₹{totalCartAmount}</p>
-                    {totalSavings > 0 && <p className="text-[10px] text-emerald-200 font-bold">Saved ₹{totalSavings}!</p>}
+                    <p className="text-sm font-black leading-tight">₹{finalTotalAmount}</p>
+                    <p className="text-[10px] text-emerald-200 font-bold">
+                      {deliveryFee === 0 ? '✓ Free Delivery Unlocked' : 'Add ₹' + (149 - itemTotal) + ' for Free Delivery'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 font-black text-xs bg-emerald-800/80 px-3 py-1.5 rounded-xl">
-                  <span>View Cart ➔</span>
+                  <span>View Bill ➔</span>
                 </div>
               </div>
             </div>
           )}
 
+          {/* Checkout Slide-Up with Delivery & Platform Fee Breakdown */}
           {showCheckout && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-end justify-center">
               <div className="bg-white rounded-t-3xl max-w-md w-full p-4 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
                 <div className="flex justify-between items-center border-b pb-3">
                   <div>
-                    <h3 className="font-black text-base text-slate-800">Review & Place Order</h3>
-                    <p className="text-xs text-slate-500 font-semibold">{totalCartCount} Items • ₹{totalCartAmount}</p>
+                    <h3 className="font-black text-base text-slate-800">Bill Breakdown & Checkout</h3>
+                    <p className="text-xs text-slate-500 font-semibold">{totalCartCount} Items</p>
                   </div>
                   <button onClick={() => setShowCheckout(false)} className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">✕</button>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-2xl border space-y-1.5 text-xs">
+                {/* Detailed Bill Summary */}
+                <div className="bg-slate-50 p-3.5 rounded-2xl border space-y-2 text-xs">
                   {cart.map((item) => (
                     <div key={item.id} className="flex justify-between text-slate-700 font-medium">
                       <span>{item.name} x {item.qty}</span>
                       <span className="font-bold">₹{item.price * item.qty}</span>
                     </div>
                   ))}
-                  <div className="border-t pt-2 mt-2 flex justify-between font-black text-sm text-slate-900">
-                    <span>Total Bill</span>
-                    <span className="text-emerald-700">₹{totalCartAmount}</span>
+
+                  <div className="border-t pt-2 space-y-1">
+                    <div className="flex justify-between text-slate-600">
+                      <span>Item Subtotal:</span>
+                      <span className="font-bold">₹{itemTotal}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>Delivery Partner Fee:</span>
+                      <span className={`font-bold ${deliveryFee === 0 ? 'text-emerald-600 font-black' : ''}`}>
+                        {deliveryFee === 0 ? 'FREE (Orders ₹149+)' : '₹20'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>Platform Handling Fee:</span>
+                      <span className="font-bold">₹{platformFee}</span>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-2 flex justify-between font-black text-sm text-slate-900">
+                    <span>Grand Total Payable</span>
+                    <span className="text-emerald-700">₹{finalTotalAmount}</span>
                   </div>
                 </div>
 
@@ -549,7 +644,7 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
 
                   {paymentMethod === 'upi' && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center space-y-2">
-                      <p className="text-xs font-black text-emerald-800">Scan & Pay ₹{totalCartAmount}</p>
+                      <p className="text-xs font-black text-emerald-800">Scan & Pay ₹{finalTotalAmount}</p>
                       <img src={qrCodeUrl} alt="QR" className="w-32 h-32 mx-auto border rounded-xl" />
                       <a href={upiUrl} className="block w-full py-2 bg-emerald-600 text-white font-black rounded-xl text-xs">📱 GPay / PhonePe App</a>
                       <input type="text" placeholder="UTR Number (Optional)" value={utrNumber} onChange={(e) => setUtrNumber(e.target.value)} className="w-full p-2 rounded-lg border bg-white text-center text-xs" />
@@ -557,7 +652,7 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
                   )}
 
                   <button type="submit" disabled={isSubmitting} className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-sm shadow-lg transition">
-                    {isSubmitting ? 'Placing...' : `Confirm Order • ₹${totalCartAmount}`}
+                    {isSubmitting ? 'Placing...' : `Confirm Order • ₹${finalTotalAmount}`}
                   </button>
                 </form>
               </div>
@@ -596,8 +691,8 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-1 text-xs font-bold">
-                <a href="tel:9999999999" className="py-2.5 bg-slate-100 text-slate-800 rounded-xl text-center">📞 Store</a>
-                <a href="tel:9999999999" className="py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-center">🛵 Rider</a>
+                <a href={`tel:${STORE_SUPPORT_PHONE}`} className="py-2.5 bg-slate-100 text-slate-800 rounded-xl text-center">📞 Store</a>
+                <a href={`tel:${STORE_SUPPORT_PHONE}`} className="py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-center">🛵 Rider</a>
               </div>
             </div>
           )}
@@ -632,9 +727,14 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
               <h1 className="text-xl font-black text-orange-500">🏪 DUKAAN PARTNER</h1>
               <p className="text-xs text-slate-400">Live Orders & Stock Control</p>
             </div>
-            <button onClick={() => navigateTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-3 py-1.5 rounded-lg border border-slate-700">
-              Customer App ➔
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => navigateTo('poster')} className="text-xs bg-orange-600 text-white font-bold px-2.5 py-1.5 rounded-lg">
+                🖨️ QR Poster
+              </button>
+              <button onClick={() => navigateTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-2.5 py-1.5 rounded-lg border border-slate-700">
+                Exit
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 bg-slate-800 p-1 rounded-xl text-xs font-bold gap-1 my-3">
@@ -661,7 +761,9 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
 
                   <div className="border-t border-slate-700 pt-2 text-slate-300">
                     {ord.items?.map((it, idx) => <div key={idx}>{it.name} x {it.qty} (₹{it.price * it.qty})</div>)}
-                    <div className="font-bold text-white pt-1">Total: ₹{ord.total_amount} ({ord.payment_status})</div>
+                    <div className="font-bold text-white pt-1">
+                      Total: ₹{ord.total_amount} ({ord.payment_status})
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 pt-1">
@@ -729,7 +831,7 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
       )}
 
       {/* ======================================================== */}
-      {/* 3. MASTER ADMIN VIEW (Store Onboarding & Analytics)      */}
+      {/* 3. MASTER ADMIN VIEW                                     */}
       {/* ======================================================== */}
       {currentView === 'admin' && (
         <div className="min-h-screen bg-slate-950 text-white p-4 max-w-md mx-auto space-y-4">
@@ -738,9 +840,14 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
               <h1 className="text-xl font-black text-amber-500">👑 MASTER ADMIN</h1>
               <p className="text-xs text-slate-400">Total Business & Store Control</p>
             </div>
-            <button onClick={() => navigateTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-3 py-1.5 rounded-lg border border-slate-700">
-              Customer App ➔
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => navigateTo('poster')} className="text-xs bg-orange-600 text-white font-bold px-2.5 py-1.5 rounded-lg">
+                🖨️ QR Poster
+              </button>
+              <button onClick={() => navigateTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-2.5 py-1.5 rounded-lg border border-slate-700">
+                Exit
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -826,7 +933,7 @@ ${ord.items.map((i, idx) => `${idx + 1}. ${i.name} x ${i.qty} = ₹${i.price * i
       )}
 
       {/* ======================================================== */}
-      {/* 4. RIDER VIEW WITH WHATSAPP NAVIGATION                   */}
+      {/* 4. RIDER VIEW                                            */}
       {/* ======================================================== */}
       {currentView === 'rider' && (
         <div className="min-h-screen bg-slate-900 text-white p-4 max-w-md mx-auto">
