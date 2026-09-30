@@ -9,33 +9,179 @@ const DEFAULT_STORES = [
 ];
 
 const DEFAULT_PRODUCTS = [
-  // Sweets
-  { id: 'p1', store_id: 'store-1', name: 'Desi Ghee Jalebi & Malai Rabri', price: 80, mrp: 110, unit: '250 gm', image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500', in_stock: true },
-  { id: 'p2', store_id: 'store-1', name: 'Special Aloo Matar Samosa (2 Pcs)', price: 30, mrp: 40, unit: '2 Pcs with Chutney', image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500', in_stock: true },
-  { id: 'p3', store_id: 'store-1', name: 'Gulab Jamun Shahi Box', price: 70, mrp: 90, unit: '4 Pcs Box', image: 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?w=500', in_stock: true },
-  // Kirana & Milk
-  { id: 'p4', store_id: 'store-2', name: 'Fresh Cow Milk Pouch', price: 65, mrp: 68, unit: '1 Litre Pouch', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500', in_stock: true },
-  { id: 'p5', store_id: 'store-2', name: 'Chakki Fresh Sharbati Gehu Atta', price: 210, mrp: 245, unit: '5 kg Bag', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500', in_stock: true },
-  { id: 'p6', store_id: 'store-2', name: 'Amul Salted Table Butter', price: 58, mrp: 60, unit: '100 gm Pack', image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500', in_stock: true },
-  // Pharmacy
-  { id: 'p7', store_id: 'store-3', name: 'Dolo 650mg Paracetamol Tablets', price: 32, mrp: 35, unit: 'Strip of 15 Tablets', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500', in_stock: true },
-  { id: 'p8', store_id: 'store-3', name: 'Band-Aid Washproof Strips', price: 50, mrp: 60, unit: 'Pack of 20 Strips', image: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=500', in_stock: true },
-  // Vegetables & Fruits
-  { id: 'p9', store_id: 'store-4', name: 'Desi Pahadi Aloo (Potatoes)', price: 35, mrp: 45, unit: '1 kg Taaza Sabzi', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500', in_stock: true },
-  { id: 'p10', store_id: 'store-4', name: 'Fresh Robusta Bananas (Kela)', price: 50, mrp: 60, unit: '1 Dozen (12 Pcs)', image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500', in_stock: true }
+  // --- 1. HALWAI & SWEETS (Real Indian Sweets Photos) ---
+  { 
+    id: 'p1', 
+    store_id: 'store-1', 
+    name: 'Desi Ghee Kurkuri Jalebi', 
+    price: 80, 
+    mrp: 110, 
+    unit: '250 gm (Garma-Garam)', 
+    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+  { 
+    id: 'p2', 
+    store_id: 'store-1', 
+    name: 'Special Aloo Matar Samosa (2 Pcs)', 
+    price: 30, 
+    mrp: 40, 
+    unit: '2 Pcs with Green & Meethi Chutney', 
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+  { 
+    id: 'p3', 
+    store_id: 'store-1', 
+    name: 'Shahi Mawa Gulab Jamun Box', 
+    price: 70, 
+    mrp: 90, 
+    unit: '4 Pcs Box', 
+    image: 'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+  { 
+    id: 'p4', 
+    store_id: 'store-1', 
+    name: 'Kaju Katli Special Vark', 
+    price: 230, 
+    mrp: 270, 
+    unit: '250 gm Pack', 
+    image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+
+  // --- 2. KIRANA & DAIRY (Real Milk, Atta, Butter Photos) ---
+  { 
+    id: 'p5', 
+    store_id: 'store-2', 
+    name: 'Fresh Cow Milk Pouch', 
+    price: 65, 
+    mrp: 68, 
+    unit: '1 Litre Pouch', 
+    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+  { 
+    id: 'p6', 
+    store_id: 'store-2', 
+    name: 'Chakki Fresh Sharbati Gehu Atta', 
+    price: 210, 
+    mrp: 245, 
+    unit: '5 kg Bag', 
+    image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+  { 
+    id: 'p7', 
+    store_id: 'store-2', 
+    name: 'Amul Salted Table Butter', 
+    price: 58, 
+    mrp: 60, 
+    unit: '100 gm Pack', 
+    image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+  { 
+    id: 'p8', 
+    store_id: 'store-2', 
+    name: 'Fortune Kachi Ghani Mustard Oil', 
+    price: 145, 
+    mrp: 165, 
+    unit: '1 Litre Bottle', 
+    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+
+  // --- 3. PHARMACY / MEDICAL ---
+  { 
+    id: 'p9', 
+    store_id: 'store-3', 
+    name: 'Dolo 650mg Tablets', 
+    price: 32, 
+    mrp: 35, 
+    unit: '15 Tablets Strip', 
+    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+  { 
+    id: 'p10', 
+    store_id: 'store-3', 
+    name: 'Band-Aid Washproof Strips', 
+    price: 50, 
+    mrp: 60, 
+    unit: 'Pack of 20 Strips', 
+    image: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+
+  // --- 4. TAAZA FAL & SABZI ---
+  { 
+    id: 'p11', 
+    store_id: 'store-4', 
+    name: 'Desi Pahadi Aloo (Potatoes)', 
+    price: 35, 
+    mrp: 45, 
+    unit: '1 kg Taaza Sabzi', 
+    image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  },
+  { 
+    id: 'p12', 
+    store_id: 'store-4', 
+    name: 'Fresh Robusta Bananas (Kela)', 
+    price: 50, 
+    mrp: 60, 
+    unit: '1 Dozen (12 Pcs)', 
+    image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=80', 
+    in_stock: true 
+  }
 ];
 
 const PHOTO_PRESETS = [
-  { label: '🍨 Mithai', url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500' },
+  { label: '🍨 Mithai', url: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500' },
   { label: '🥟 Samosa', url: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500' },
   { label: '🥛 Doodh', url: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500' },
-  { label: '🌾 Atta', url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500' },
+  { label: '🌾 Atta', url: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500' },
   { label: '💊 Dawa', url: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500' },
   { label: '🥔 Sabzi', url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500' }
 ];
 
+const playArrowImpactSound = () => {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(320, ctx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.5);
+    gain1.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start();
+    osc1.stop(ctx.currentTime + 0.5);
+
+    setTimeout(() => {
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(140, ctx.currentTime);
+      osc2.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.35);
+      gain2.gain.setValueAtTime(0.8, ctx.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start();
+      osc2.stop(ctx.currentTime + 0.35);
+    }, 700);
+  } catch (e) {}
+};
+
 export default function App() {
-  // Authentication State
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('nephka_user');
@@ -45,14 +191,12 @@ export default function App() {
     }
   });
 
-  const [authRole, setAuthRole] = useState('customer'); // 'customer', 'dukaan'
-  const [dukaanAuthMode, setDukaanAuthMode] = useState('login'); // 'login', 'register'
+  const [authRole, setAuthRole] = useState('customer');
+  const [dukaanAuthMode, setDukaanAuthMode] = useState('login');
 
-  // Customer Auth Input
   const [custNameInput, setCustNameInput] = useState('');
   const [custPhoneInput, setCustPhoneInput] = useState('');
 
-  // Dukaan KYC & Login Input
   const [dukaanLoginPhone, setDukaanLoginPhone] = useState('');
   const [dukaanLoginPin, setDukaanLoginPin] = useState('');
   const [regStoreName, setRegStoreName] = useState('');
@@ -61,26 +205,24 @@ export default function App() {
   const [regCategory, setRegCategory] = useState('Kirana & Milk');
   const [regAadhaar, setRegAadhaar] = useState('');
   const [regPan, setRegPan] = useState('');
-  const [regPin, setRegPin] = useState('1111');
 
-  // General App State
-  const [currentView, setCurrentView] = useState('customer'); // 'customer', 'dukaan', 'admin', 'rider', 'poster'
+  const [currentView, setCurrentView] = useState('customer');
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
 
-  // Business Configuration
+  const [showArrowAnimation, setShowArrowAnimation] = useState(false);
+  const [targetStoreInfo, setTargetStoreInfo] = useState(null);
+
   const [upiId, setUpiId] = useState(() => localStorage.getItem('nephka_upi') || 'nephka@upi');
   const [supportPhone, setSupportPhone] = useState(() => localStorage.getItem('nephka_phone') || '919876543210');
   const [savedNotice, setSavedNotice] = useState(false);
 
-  // Siren & PWA
   const sirenAudioRef = useRef(null);
   const [isSirenMuted, setIsSirenMuted] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-  // Customer Shopping Flow
   const [cart, setCart] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
   const [showCheckout, setShowCheckout] = useState(false);
@@ -92,7 +234,6 @@ export default function App() {
   const [utrNumber, setUtrNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Dukaan Panel Form
   const [dukaanTab, setDukaanTab] = useState('orders');
   const [selectedDukaanStore, setSelectedDukaanStore] = useState('store-1');
   const [newItemName, setNewItemName] = useState('');
@@ -101,7 +242,6 @@ export default function App() {
   const [newItemUnit, setNewItemUnit] = useState('Standard Pack');
   const [newItemImage, setNewItemImage] = useState(PHOTO_PRESETS[0].url);
 
-  // Cart Calculations
   const itemTotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
   const totalCartCount = cart.reduce((acc, item) => acc + item.qty, 0);
   const deliveryFee = itemTotal === 0 || itemTotal >= 149 ? 0 : 20;
@@ -135,7 +275,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 💳 *PAYMENT:* ${order.payment_status} (${order.payment_method})
 🗺️ *MAP NAVIGATION:* ${mapLink}
 ━━━━━━━━━━━━━━━━━━━━
-*NEPHKA - Apna Shehar, Aapki Dukaan*`;
+*NEPHKA - Fast Hyperlocal Delivery*`;
 
     const sanitizedPhone = order.customer_phone.replace(/[^0-9]/g, '');
     const fullPhone = sanitizedPhone.length === 10 ? '91' + sanitizedPhone : sanitizedPhone;
@@ -235,7 +375,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     routeTo('customer');
   };
 
-  // --- 1. Customer Login Handler ---
   const handleCustomerLogin = (e) => {
     e.preventDefault();
     if (!custNameInput || !custPhoneInput) return alert('Naam aur mobile number bharein!');
@@ -249,7 +388,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     routeTo('customer');
   };
 
-  // --- 2. Dukaan Login Handler ---
   const handleDukaanLogin = (e) => {
     e.preventDefault();
     if (!dukaanLoginPhone || !dukaanLoginPin) return alert('Phone aur PIN enter karein!');
@@ -268,20 +406,13 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     routeTo('dukaan');
   };
 
-  // --- 3. Dukaan Registration With Aadhaar & PAN Card KYC ---
   const handleDukaanKycRegister = async (e) => {
     e.preventDefault();
     if (!regStoreName || !regOwnerName || !regPhone || !regAadhaar || !regPan) {
       return alert('Kripya Aadhaar, PAN aur Dukaan ki poori jaankari bharein!');
     }
-
-    if (regAadhaar.length !== 12) {
-      return alert('Aadhaar Card number theek 12 digits ka hona chahiye!');
-    }
-
-    if (regPan.length !== 10) {
-      return alert('PAN Card number theek 10 characters (e.g. ABCDE1234F) ka hona chahiye!');
-    }
+    if (regAadhaar.length !== 12) return alert('Aadhaar Card 12 digits ka hona chahiye!');
+    if (regPan.length !== 10) return alert('PAN Card 10 characters ka hona chahiye!');
 
     const newStoreId = 'store_' + Date.now();
     const freshStore = {
@@ -297,12 +428,9 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
       is_verified: true
     };
 
-    try {
-      await supabase.from('stores').insert([freshStore]);
-    } catch {}
+    try { await supabase.from('stores').insert([freshStore]); } catch {}
 
     setStores((prev) => [...prev, freshStore]);
-
     const userObj = {
       role: 'dukaan',
       name: freshStore.name,
@@ -315,7 +443,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     localStorage.setItem('nephka_user', JSON.stringify(userObj));
     setCurrentUser(userObj);
     setSelectedDukaanStore(newStoreId);
-    alert(`🎉 "${freshStore.name}" Aadhaar & PAN KYC ke sath verify ho gayi hai!`);
+    alert(`🎉 "${freshStore.name}" Aadhaar & PAN KYC ke sath verify ho gayi!`);
     routeTo('dukaan');
   };
 
@@ -402,9 +530,12 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     }
 
     setIsSubmitting(true);
+    const destinationStore = stores.find((s) => s.id === cart[0]?.store_id) || stores[0];
+    setTargetStoreInfo(destinationStore);
+
     const orderRecord = {
       id: 'ord_' + Date.now(),
-      store_id: cart[0]?.store_id || 'store-1',
+      store_id: destinationStore.id,
       customer_name: currentUser.name,
       customer_phone: currentUser.phone,
       address,
@@ -426,11 +557,17 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
       await supabase.from('orders').insert([orderRecord]);
     } catch {}
 
-    setOrders((prev) => [orderRecord, ...prev]);
-    setActiveOrderId(orderRecord.id);
-    setIsSubmitting(false);
     setShowCheckout(false);
-    setCart([]);
+    setShowArrowAnimation(true);
+    playArrowImpactSound();
+
+    setTimeout(() => {
+      setOrders((prev) => [orderRecord, ...prev]);
+      setActiveOrderId(orderRecord.id);
+      setShowArrowAnimation(false);
+      setIsSubmitting(false);
+      setCart([]);
+    }, 2400);
   };
 
   const handleAddNewItemToDukaan = async (e) => {
@@ -458,27 +595,15 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     alert(`✅ "${freshItem.name}" live jud gaya!`);
   };
 
-  const handleSaveSettings = (e) => {
-    e.preventDefault();
-    localStorage.setItem('nephka_upi', upiId);
-    localStorage.setItem('nephka_phone', supportPhone);
-    setSavedNotice(true);
-    setTimeout(() => setSavedNotice(false), 3000);
-  };
-
   const trackedOrder = orders.find((o) => o.id === activeOrderId);
   const trackStep = trackedOrder?.status === 'delivered' ? 4 : trackedOrder?.status === 'out_for_delivery' ? 3 : trackedOrder?.status === 'accepted' ? 2 : 1;
   const grossSalesVolume = orders.reduce((acc, o) => acc + Number(o.total_amount || 0), 0);
 
-  // ========================================================
-  // RENDER SCREEN: IF NOT LOGGED IN -> UNIFIED LOGIN SCREEN
-  // ========================================================
+  // LOGIN SCREEN
   if (!currentUser && currentView !== 'poster') {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans select-none">
         <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-100">
-          
-          {/* Header & Logo */}
           <div className="text-center space-y-1">
             <div className="w-12 h-12 bg-orange-600 rounded-2xl mx-auto flex items-center justify-center text-white font-black text-2xl shadow-md">
               N
@@ -487,7 +612,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             <p className="text-xs text-slate-500 font-semibold">⚡ 15-Minute Hyperlocal Superfast Delivery</p>
           </div>
 
-          {/* Role Tabs: Customer vs Dukaan */}
           <div className="grid grid-cols-2 bg-slate-100 p-1 rounded-2xl text-xs font-bold gap-1">
             <button
               onClick={() => setAuthRole('customer')}
@@ -503,7 +627,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </button>
           </div>
 
-          {/* 1. CUSTOMER LOGIN FORM */}
           {authRole === 'customer' && (
             <form onSubmit={handleCustomerLogin} className="space-y-3.5 text-xs">
               <div className="bg-orange-50/60 p-3 rounded-xl border border-orange-100 text-orange-900">
@@ -545,7 +668,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </form>
           )}
 
-          {/* 2. DUKAAN AUTH & GOVT KYC FORM */}
           {authRole === 'dukaan' && (
             <div className="space-y-4">
               <div className="flex justify-center gap-4 text-xs font-bold border-b pb-2">
@@ -565,7 +687,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                 </button>
               </div>
 
-              {/* DUKAAN SUB-OPTION A: LOGIN */}
               {dukaanAuthMode === 'login' && (
                 <form onSubmit={handleDukaanLogin} className="space-y-3 text-xs">
                   <div>
@@ -600,7 +721,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                 </form>
               )}
 
-              {/* DUKAAN SUB-OPTION B: REGISTRATION WITH AADHAAR & PAN CARD */}
               {dukaanAuthMode === 'register' && (
                 <form onSubmit={handleDukaanKycRegister} className="space-y-2.5 text-xs max-h-[62vh] overflow-y-auto pr-1">
                   <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100 text-emerald-900 text-[11px]">
@@ -660,7 +780,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                     </div>
                   </div>
 
-                  {/* AADHAAR CARD NUMBER FIELD */}
                   <div>
                     <label className="font-bold text-slate-800 block mb-0.5">
                       Aadhaar Card Number (12 Digits):
@@ -676,7 +795,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                     />
                   </div>
 
-                  {/* PAN CARD NUMBER FIELD */}
                   <div>
                     <label className="font-bold text-slate-800 block mb-0.5">
                       PAN Card Number (10 Characters):
@@ -703,7 +821,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </div>
           )}
 
-          {/* Quick Standee & Admin Links */}
           <div className="pt-2 border-t text-center flex justify-center gap-3 text-[11px] text-slate-400">
             <button onClick={() => routeTo('poster')} className="hover:underline">🖨️ QR Standee</button>
             <span>•</span>
@@ -725,13 +842,97 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     );
   }
 
-  // ========================================================
-  // RENDER APP ONCE LOGGED IN
-  // ========================================================
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 pb-20 font-sans select-none">
+    <div className="min-h-screen bg-slate-100 text-slate-900 pb-20 font-sans select-none relative overflow-x-hidden">
       
-      {/* Top Universal Navbar with User Profile & Logout */}
+      {/* DHANUSH TEER OVERLAY */}
+      {showArrowAnimation && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-hidden">
+          <style>{`
+            @keyframes bowPull {
+              0% { transform: scale(0.8) rotate(-15deg); opacity: 0; }
+              25% { transform: scale(1.1) rotate(0deg); opacity: 1; }
+              40% { transform: scale(1.15) rotate(5deg); }
+              50% { transform: scale(0.9) rotate(-10deg); }
+              100% { transform: scale(0.9) rotate(-10deg); opacity: 0.2; }
+            }
+            @keyframes arrowFlyAcross {
+              0% { transform: translate(-140px, 0) scale(0.8); opacity: 0; }
+              45% { transform: translate(-100px, 0) scale(1); opacity: 1; }
+              75% { transform: translate(110px, 0) scale(1.3); opacity: 1; }
+              85% { transform: translate(140px, 0) scale(1); opacity: 1; filter: drop-shadow(0 0 15px #f97316); }
+              100% { transform: translate(150px, 0) scale(0.95); opacity: 0; }
+            }
+            @keyframes storeTargetHit {
+              0%, 65% { transform: scale(1); filter: brightness(1); }
+              75% { transform: scale(1.35) rotate(-6deg); filter: brightness(1.6) drop-shadow(0 0 25px #22c55e); }
+              85% { transform: scale(0.95) rotate(4deg); }
+              100% { transform: scale(1.1); filter: drop-shadow(0 0 20px #eab308); }
+            }
+            @keyframes speedTrail {
+              0% { width: 0; opacity: 0; }
+              50% { width: 140px; opacity: 0.9; }
+              100% { width: 0; opacity: 0; }
+            }
+            .animate-bow { animation: bowPull 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+            .animate-arrow { animation: arrowFlyAcross 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+            .animate-target { animation: storeTargetHit 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+            .animate-trail { animation: speedTrail 1.8s ease-in-out forwards; }
+          `}</style>
+
+          <div className="text-center mb-6">
+            <span className="text-[11px] font-black uppercase tracking-widest text-orange-400 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/30">
+              ⚡ EXPRESS TELEPORT STRIKE
+            </span>
+            <h2 className="text-2xl font-black text-white mt-2 tracking-tight">
+              Order Fired to Store!
+            </h2>
+            <p className="text-xs text-slate-300 font-medium mt-0.5">
+              Target: <span className="text-emerald-400 font-bold">{targetStoreInfo?.name || 'Local Store'}</span>
+            </p>
+          </div>
+
+          <div className="relative w-full max-w-sm h-52 flex items-center justify-between px-4">
+            <div className="relative z-10 animate-bow flex flex-col items-center">
+              <svg width="74" height="110" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M75 10 C20 40, 20 100, 75 130" stroke="#f97316" strokeWidth="9" strokeLinecap="round"/>
+                <path d="M72 15 C26 42, 26 98, 72 125" stroke="#facc15" strokeWidth="3" strokeLinecap="round"/>
+                <line x1="75" y1="10" x2="35" y2="70" stroke="#ffffff" strokeWidth="2.5" strokeDasharray="3 2" />
+                <line x1="35" y1="70" x2="75" y2="130" stroke="#ffffff" strokeWidth="2.5" strokeDasharray="3 2" />
+              </svg>
+              <span className="text-[10px] font-black text-orange-300 mt-1 uppercase">Aapka Order</span>
+            </div>
+
+            <div className="absolute left-1/2 -translate-x-1/2 z-20 animate-arrow flex items-center">
+              <div className="h-1.5 bg-gradient-to-r from-transparent via-orange-500 to-amber-300 rounded-full animate-trail -mr-2" />
+              <svg width="88" height="32" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="10" y1="20" x2="98" y2="20" stroke="#f8fafc" strokeWidth="5" strokeLinecap="round" />
+                <line x1="12" y1="20" x2="90" y2="20" stroke="#ea580c" strokeWidth="2.5" />
+                <polygon points="95,10 118,20 95,30 102,20" fill="#facc15" stroke="#f97316" strokeWidth="2" />
+                <polygon points="5,20 18,10 24,20 18,30" fill="#38bdf8" />
+              </svg>
+            </div>
+
+            <div className="relative z-10 animate-target flex flex-col items-center">
+              <div className="w-20 h-20 bg-slate-900 border-4 border-emerald-500 rounded-2xl flex flex-col items-center justify-center p-2 shadow-2xl relative overflow-hidden">
+                <div className="absolute inset-0 bg-emerald-500/15 animate-ping rounded-2xl" />
+                <span className="text-3xl relative z-10">🎯</span>
+                <span className="text-[9px] font-black text-emerald-300 relative z-10 uppercase mt-0.5 truncate w-full text-center">
+                  {targetStoreInfo?.category?.split(' ')[0] || 'DUKAAN'}
+                </span>
+              </div>
+              <span className="text-[10px] font-black text-emerald-400 mt-1">Dukaan Hit!</span>
+            </div>
+          </div>
+
+          <div className="w-full max-w-xs bg-slate-900/80 border border-slate-800 rounded-2xl p-3 text-center mt-3">
+            <p className="text-xs font-bold text-slate-200">🏹 Teer dukaan par impact kar chuka hai!</p>
+            <p className="text-[10px] text-amber-400 font-semibold mt-0.5">Live siren dukaandar ke phone par ring ho rahi hai...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Top Navbar */}
       <header className="sticky top-0 z-40 bg-white shadow-xs border-b px-4 py-2.5">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -918,8 +1119,13 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                     </div>
                   )}
 
-                  <button type="submit" disabled={isSubmitting} className="w-full py-3.5 bg-emerald-600 text-white font-black rounded-2xl text-sm">
-                    {isSubmitting ? 'Placing...' : `Confirm Order • ₹${grandTotalAmount}`}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-98"
+                  >
+                    <span>🏹</span>
+                    <span>{isSubmitting ? 'Firing Order...' : `Confirm & Shoot Order • ₹${grandTotalAmount}`}</span>
                   </button>
                 </form>
               </div>
