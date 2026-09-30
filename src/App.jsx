@@ -32,37 +32,57 @@ const PHOTO_PRESETS = [
   { label: '🥔 Sabzi', url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500' }
 ];
 
-const playArrowImpactSound = () => {
+// SYNCHRONIZED AUDIO FOR 2-SECOND FLIGHT & BULLSEYE IMPACT
+const playArrowFlightAndImpact = () => {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
 
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(320, ctx.currentTime);
-    osc1.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.5);
-    gain1.gain.setValueAtTime(0.4, ctx.currentTime);
-    gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.start();
-    osc1.stop(ctx.currentTime + 0.5);
-
+    // 1. Bow String Tension & Release Whoosh (At 0.4s)
     setTimeout(() => {
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(140, ctx.currentTime);
-      osc2.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.35);
-      gain2.gain.setValueAtTime(0.8, ctx.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc2.start();
-      osc2.stop(ctx.currentTime + 0.35);
-    }, 700);
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(260, ctx.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.8);
+      gain1.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start();
+      osc1.stop(ctx.currentTime + 0.8);
+    }, 400);
+
+    // 2. High-Speed Air Whistle during 2-Second Flight (At 1.2s)
+    setTimeout(() => {
+      const oscFly = ctx.createOscillator();
+      const gainFly = ctx.createGain();
+      oscFly.type = 'triangle';
+      oscFly.frequency.setValueAtTime(480, ctx.currentTime);
+      oscFly.frequency.exponentialRampToValueAtTime(620, ctx.currentTime + 0.9);
+      gainFly.gain.setValueAtTime(0.15, ctx.currentTime);
+      gainFly.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.9);
+      oscFly.connect(gainFly);
+      gainFly.connect(ctx.destination);
+      oscFly.start();
+      oscFly.stop(ctx.currentTime + 0.9);
+    }, 1200);
+
+    // 3. Exact Impact Sound at Target (Exactly after 2.4s from start)
+    setTimeout(() => {
+      const oscImpact = ctx.createOscillator();
+      const gainImpact = ctx.createGain();
+      oscImpact.type = 'square';
+      oscImpact.frequency.setValueAtTime(150, ctx.currentTime);
+      oscImpact.frequency.exponentialRampToValueAtTime(35, ctx.currentTime + 0.45);
+      gainImpact.gain.setValueAtTime(0.9, ctx.currentTime);
+      gainImpact.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+      oscImpact.connect(gainImpact);
+      gainImpact.connect(ctx.destination);
+      oscImpact.start();
+      oscImpact.stop(ctx.currentTime + 0.45);
+    }, 2400);
   } catch (e) {}
 };
 
@@ -96,7 +116,7 @@ export default function App() {
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
 
-  // Dhanush-Teer Animation
+  // Dhanush-Teer 2-Second Flight State
   const [showArrowAnimation, setShowArrowAnimation] = useState(false);
   const [targetStoreInfo, setTargetStoreInfo] = useState(null);
 
@@ -109,13 +129,12 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-  // Cart & Recipient Details
   const [cart, setCart] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
   const [showCheckout, setShowCheckout] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState(null);
   
-  // Receiver Specific Inputs (Allows ordering for someone else)
+  // Recipient details
   const [receiverName, setReceiverName] = useState('');
   const [receiverPhone, setReceiverPhone] = useState('');
   const [deliveryNote, setDeliveryNote] = useState('');
@@ -146,7 +165,6 @@ export default function App() {
   const upiQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiIntentUrl)}`;
   const counterStandeeQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent('https://nephka.com')}`;
 
-  // When checkout opens, sync receiver defaults to logged-in user if empty
   const handleOpenCheckout = () => {
     if (!receiverName && currentUser?.name) setReceiverName(currentUser.name);
     if (!receiverPhone && currentUser?.phone) setReceiverPhone(currentUser.phone);
@@ -162,8 +180,8 @@ export default function App() {
 `⚡ *NEPHKA 15-MIN EXPRESS RECEIPT* ⚡
 ━━━━━━━━━━━━━━━━━━━━
 📦 *DELIVER TO:* ${order.customer_name}
-📞 *CALLING PHONE:* ${order.customer_phone}
-${order.ordered_by && order.ordered_by !== order.customer_name ? `👤 *BOOKED BY:* ${order.ordered_by}\n` : ''}📍 *ADDRESS:* ${order.address}
+📞 *PHONE:* ${order.customer_phone}
+${order.ordered_by && order.ordered_by !== order.customer_name ? `👤 *ORDERED BY:* ${order.ordered_by}\n` : ''}📍 *ADDRESS:* ${order.address}
 ${order.delivery_note ? `📝 *NOTE:* ${order.delivery_note}\n` : ''}
 🛒 *ORDERED ITEMS:*
 ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.price * it.qty}`).join('\n')}
@@ -171,7 +189,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 ━━━━━━━━━━━━━━━━━━━━
 💵 *Items Total:* ₹${order.item_subtotal || order.total_amount}
 🛵 *Delivery Fee:* ${order.delivery_fee === 0 ? 'FREE' : '₹' + order.delivery_fee}
-⚙️️ *Platform Fee:* ₹${order.platform_fee || 0}
+⚙️ *Platform Fee:* ₹${order.platform_fee || 0}
 💰 *GRAND TOTAL:* ₹${order.total_amount}
 💳 *PAYMENT:* ${order.payment_status} (${order.payment_method})
 🗺️ *MAP NAVIGATION:* ${mapLink}
@@ -426,7 +444,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     setCart((prev) => prev.map((i) => (i.id === prodId ? { ...i, qty: i.qty - 1 } : i)).filter((i) => i.qty > 0));
   };
 
-  // --- ORDER SUBMISSION WITH RECEIVER SPECIFICS ---
+  // --- SUBMIT WITH ACCURATE 2-SECOND FLIGHT TIME ---
   const handlePlaceOrderSubmit = async (e) => {
     e.preventDefault();
 
@@ -434,7 +452,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     const finalReceiverPhone = receiverPhone.trim() || currentUser?.phone || '';
 
     if (cart.length === 0 || !finalReceiverName || !finalReceiverPhone || !address) {
-      return alert('Kripya Delivery lene wale ka Naam, Mobile number aur Address poora bharein!');
+      return alert('Kripya Delivery lene wale ka Naam, Phone aur Address bharein!');
     }
 
     setIsSubmitting(true);
@@ -467,17 +485,19 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
       await supabase.from('orders').insert([orderRecord]);
     } catch {}
 
+    // Show Dhanush-Teer Animation and play synchronized sound
     setShowCheckout(false);
     setShowArrowAnimation(true);
-    playArrowImpactSound();
+    playArrowFlightAndImpact();
 
+    // Close animation and land on tracking after arrow hits target (~2.9s)
     setTimeout(() => {
       setOrders((prev) => [orderRecord, ...prev]);
       setActiveOrderId(orderRecord.id);
       setShowArrowAnimation(false);
       setIsSubmitting(false);
       setCart([]);
-    }, 2400);
+    }, 2950);
   };
 
   const handleAddNewItemToDukaan = async (e) => {
@@ -549,7 +569,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Pardeep Kumar"
+                  placeholder="e.g. Ramesh Kumar"
                   value={custNameInput}
                   onChange={(e) => setCustNameInput(e.target.value)}
                   className="w-full p-3 rounded-xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-orange-500"
@@ -634,7 +654,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               {dukaanAuthMode === 'register' && (
                 <form onSubmit={handleDukaanKycRegister} className="space-y-2.5 text-xs max-h-[62vh] overflow-y-auto pr-1">
                   <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100 text-emerald-900 text-[11px]">
-                    <span className="font-bold">🛡️ Merchant KYC Verification:</span>
+                    <span className="font-bold">🛡️️ Merchant KYC Verification:</span>
                     <p>Dukaan link karne ke liye Aadhaar Card aur PAN Card number bharna zaroori hai.</p>
                   </div>
 
@@ -751,44 +771,97 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-20 font-sans select-none relative overflow-x-hidden">
       
-      {/* DHANUSH TEER OVERLAY */}
+      {/* ======================================================== */}
+      {/* 🏹 PRECISE 2-SECOND FLIGHT DHANUSH-TEER OVERLAY         */}
+      {/* ======================================================== */}
       {showArrowAnimation && (
-        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-hidden">
           <style>{`
-            @keyframes bowPull {
-              0% { transform: scale(0.8) rotate(-15deg); opacity: 0; }
-              25% { transform: scale(1.1) rotate(0deg); opacity: 1; }
-              40% { transform: scale(1.15) rotate(5deg); }
-              50% { transform: scale(0.9) rotate(-10deg); }
-              100% { transform: scale(0.9) rotate(-10deg); opacity: 0.2; }
+            /* Bow string pull back: 0s to 0.4s */
+            @keyframes bowAction {
+              0% { transform: translateY(-50%) scale(0.9); }
+              20% { transform: translateY(-50%) scale(1.08) rotate(3deg); }
+              35% { transform: translateY(-50%) scale(1.12) rotate(4deg); }
+              40% { transform: translateY(-50%) scale(0.95) rotate(-2deg); }
+              100% { transform: translateY(-50%) scale(0.95); opacity: 0.6; }
             }
-            @keyframes arrowFlyAcross {
-              0% { transform: translate(-140px, 0) scale(0.8); opacity: 0; }
-              45% { transform: translate(-100px, 0) scale(1); opacity: 1; }
-              75% { transform: translate(110px, 0) scale(1.3); opacity: 1; }
-              85% { transform: translate(140px, 0) scale(1); opacity: 1; filter: drop-shadow(0 0 15px #f97316); }
-              100% { transform: translate(150px, 0) scale(0.95); opacity: 0; }
+
+            /* Arrow flight: Pulls at 0.1s, fires at 0.4s, travels 2.0s, hits target at 2.4s! */
+            @keyframes accurateArrowFlight {
+              0% { 
+                left: 45px; 
+                transform: translateY(-50%) scale(0.9); 
+                opacity: 1; 
+              }
+              15% { 
+                left: 32px; 
+                transform: translateY(-50%) scale(0.95); 
+                opacity: 1; 
+              }
+              18% { 
+                left: 48px; 
+                transform: translateY(-50%) scale(1); 
+                opacity: 1; 
+              }
+              /* 2 Seconds pure travel across screen */
+              85% { 
+                left: calc(100% - 110px); 
+                transform: translateY(-50%) scale(1.1); 
+                opacity: 1; 
+                filter: drop-shadow(0 0 16px #f97316); 
+              }
+              90% { 
+                left: calc(100% - 90px); 
+                transform: translateY(-50%) scale(1); 
+                opacity: 1; 
+              }
+              100% { 
+                left: calc(100% - 90px); 
+                transform: translateY(-50%) scale(1); 
+                opacity: 1; 
+              }
             }
-            @keyframes storeTargetHit {
-              0%, 65% { transform: scale(1); filter: brightness(1); }
-              75% { transform: scale(1.35) rotate(-6deg); filter: brightness(1.6) drop-shadow(0 0 25px #22c55e); }
-              85% { transform: scale(0.95) rotate(4deg); }
-              100% { transform: scale(1.1); filter: drop-shadow(0 0 20px #eab308); }
+
+            /* Bullseye impact shake: Triggers at 2.4s (88% of keyframes) */
+            @keyframes targetImpactShake {
+              0%, 84% { 
+                transform: translateY(-50%) scale(1); 
+                filter: brightness(1); 
+              }
+              88% { 
+                transform: translateY(-50%) scale(1.35) rotate(-8deg); 
+                filter: brightness(1.8) drop-shadow(0 0 25px #22c55e); 
+              }
+              92% { 
+                transform: translateY(-50%) scale(0.92) rotate(6deg); 
+              }
+              96% { 
+                transform: translateY(-50%) scale(1.1) rotate(-3deg); 
+                filter: drop-shadow(0 0 20px #eab308); 
+              }
+              100% { 
+                transform: translateY(-50%) scale(1) rotate(0deg); 
+              }
             }
-            @keyframes speedTrail {
+
+            @keyframes flameTail {
               0% { width: 0; opacity: 0; }
-              50% { width: 140px; opacity: 0.9; }
+              20% { width: 40px; opacity: 0.8; }
+              60% { width: 120px; opacity: 1; }
+              85% { width: 140px; opacity: 1; }
+              90% { width: 0; opacity: 0; }
               100% { width: 0; opacity: 0; }
             }
-            .animate-bow { animation: bowPull 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-            .animate-arrow { animation: arrowFlyAcross 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-            .animate-target { animation: storeTargetHit 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-            .animate-trail { animation: speedTrail 1.8s ease-in-out forwards; }
+
+            .animate-bow-action { animation: bowAction 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+            .animate-arrow-flight { animation: accurateArrowFlight 2.8s cubic-bezier(0.2, 0.8, 0.4, 1) forwards; }
+            .animate-target-impact { animation: targetImpactShake 2.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+            .animate-tail { animation: flameTail 2.8s ease-in-out forwards; }
           `}</style>
 
           <div className="text-center mb-6">
             <span className="text-[11px] font-black uppercase tracking-widest text-orange-400 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/30">
-              ⚡ EXPRESS TELEPORT STRIKE
+              ⚡ 2-SECOND EXPRESS ARROW STRIKE
             </span>
             <h2 className="text-2xl font-black text-white mt-2 tracking-tight">
               Order Fired to Store!
@@ -798,47 +871,61 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </p>
           </div>
 
-          <div className="relative w-full max-w-sm h-52 flex items-center justify-between px-4">
-            <div className="relative z-10 animate-bow flex flex-col items-center">
-              <svg width="74" height="110" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M75 10 C20 40, 20 100, 75 130" stroke="#f97316" strokeWidth="9" strokeLinecap="round"/>
-                <path d="M72 15 C26 42, 26 98, 72 125" stroke="#facc15" strokeWidth="3" strokeLinecap="round"/>
-                <line x1="75" y1="10" x2="35" y2="70" stroke="#ffffff" strokeWidth="2.5" strokeDasharray="3 2" />
-                <line x1="35" y1="70" x2="75" y2="130" stroke="#ffffff" strokeWidth="2.5" strokeDasharray="3 2" />
+          {/* Unified Horizontal Flight Runway */}
+          <div className="relative w-full max-w-sm h-48 bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden px-4 shadow-2xl">
+            
+            {/* 1. Left: Dhanush (Bow) firmly anchored on left center */}
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 animate-bow-action flex flex-col items-center">
+              <svg width="68" height="110" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M75 10 C18 42, 18 98, 75 130" stroke="#f97316" strokeWidth="10" strokeLinecap="round"/>
+                <path d="M72 15 C24 44, 24 96, 72 125" stroke="#facc15" strokeWidth="3.5" strokeLinecap="round"/>
+                <line x1="75" y1="10" x2="35" y2="70" stroke="#ffffff" strokeWidth="2.5" />
+                <line x1="35" y1="70" x2="75" y2="130" stroke="#ffffff" strokeWidth="2.5" />
               </svg>
-              <span className="text-[10px] font-black text-orange-300 mt-1 uppercase">Aapka Order</span>
+              <span className="text-[9px] font-black text-orange-400 mt-1 uppercase tracking-tight">Dhanush</span>
             </div>
 
-            <div className="absolute left-1/2 -translate-x-1/2 z-20 animate-arrow flex items-center">
-              <div className="h-1.5 bg-gradient-to-r from-transparent via-orange-500 to-amber-300 rounded-full animate-trail -mr-2" />
-              <svg width="88" height="32" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="10" y1="20" x2="98" y2="20" stroke="#f8fafc" strokeWidth="5" strokeLinecap="round" />
-                <line x1="12" y1="20" x2="90" y2="20" stroke="#ea580c" strokeWidth="2.5" />
-                <polygon points="95,10 118,20 95,30 102,20" fill="#facc15" stroke="#f97316" strokeWidth="2" />
-                <polygon points="5,20 18,10 24,20 18,30" fill="#38bdf8" />
+            {/* 2. Center: Flying Teer (Starts exactly on bowstring and flies for 2 seconds) */}
+            <div className="absolute top-1/2 z-20 animate-arrow-flight flex items-center pointer-events-none">
+              {/* Sonic Fire Tail */}
+              <div className="h-1 bg-gradient-to-r from-transparent via-orange-500 to-amber-300 rounded-full animate-tail -mr-1 shadow-lg" />
+              {/* Arrow SVG */}
+              <svg width="84" height="28" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Arrow Shaft */}
+                <line x1="12" y1="20" x2="98" y2="20" stroke="#ffffff" strokeWidth="4.5" strokeLinecap="round" />
+                <line x1="14" y1="20" x2="90" y2="20" stroke="#ea580c" strokeWidth="2.5" />
+                {/* Golden Arrow Head */}
+                <polygon points="94,10 118,20 94,30 101,20" fill="#facc15" stroke="#f97316" strokeWidth="2" />
+                {/* Feathers */}
+                <polygon points="6,20 18,10 24,20 18,30" fill="#38bdf8" />
               </svg>
             </div>
 
-            <div className="relative z-10 animate-target flex flex-col items-center">
-              <div className="w-20 h-20 bg-slate-900 border-4 border-emerald-500 rounded-2xl flex flex-col items-center justify-center p-2 shadow-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-emerald-500/15 animate-ping rounded-2xl" />
+            {/* 3. Right: Dukaan Target Bullseye firmly anchored on right center */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 animate-target-impact flex flex-col items-center">
+              <div className="w-18 h-18 bg-slate-950 border-4 border-emerald-500 rounded-2xl flex flex-col items-center justify-center p-2 shadow-2xl relative">
                 <span className="text-3xl relative z-10">🎯</span>
-                <span className="text-[9px] font-black text-emerald-300 relative z-10 uppercase mt-0.5 truncate w-full text-center">
+                <span className="text-[8px] font-black text-emerald-300 relative z-10 uppercase mt-0.5 truncate w-full text-center">
                   {targetStoreInfo?.category?.split(' ')[0] || 'DUKAAN'}
                 </span>
               </div>
-              <span className="text-[10px] font-black text-emerald-400 mt-1">Dukaan Hit!</span>
+              <span className="text-[9px] font-black text-emerald-400 mt-1 uppercase tracking-tight">Target</span>
             </div>
+
           </div>
 
-          <div className="w-full max-w-xs bg-slate-900/80 border border-slate-800 rounded-2xl p-3 text-center mt-3">
-            <p className="text-xs font-bold text-slate-200">🏹 Teer dukaan par impact kar chuka hai!</p>
-            <p className="text-[10px] text-amber-400 font-semibold mt-0.5">Live siren dukaandar ke phone par ring ho rahi hai...</p>
+          <div className="w-full max-w-xs bg-slate-900/80 border border-slate-800 rounded-2xl p-3 text-center mt-4">
+            <p className="text-xs font-bold text-slate-200">
+              🏹 Teer 2 second mein dukaan par lag raha hai...
+            </p>
+            <p className="text-[10px] text-amber-400 font-semibold mt-0.5">
+              Live order siren dukaandar ke paas pahunch rahi hai!
+            </p>
           </div>
         </div>
       )}
 
-      {/* Top Navbar */}
+      {/* Top Universal Navbar */}
       <header className="sticky top-0 z-40 bg-white shadow-xs border-b px-4 py-2.5">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -985,7 +1072,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </div>
           )}
 
-          {/* Checkout Slide-Up Sheet with Full Recipient Editing */}
+          {/* Checkout Slide-Up Sheet */}
           {showCheckout && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-end justify-center">
               <div className="bg-white rounded-t-3xl max-w-md w-full p-4 max-h-[92vh] overflow-y-auto space-y-4 shadow-2xl">
@@ -1012,7 +1099,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 
                 <form onSubmit={handlePlaceOrderSubmit} className="space-y-3 text-xs">
                   
-                  {/* RECIPIENT PERSON SELECTION (Aapka ya kisi aur ke liye) */}
+                  {/* Recipient Details */}
                   <div className="bg-orange-50/70 border border-orange-200/80 p-3 rounded-2xl space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="font-black text-orange-950 flex items-center gap-1.5">
@@ -1065,15 +1152,8 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                         />
                       </div>
                     </div>
-
-                    {currentUser && currentUser.name !== receiverName && (
-                      <p className="text-[10px] text-orange-800 font-semibold">
-                        ✓ Booking by: <span className="font-bold">{currentUser.name}</span> | Delivery to: <span className="font-bold">{receiverName || '...'}</span>
-                      </p>
-                    )}
                   </div>
 
-                  {/* ADDRESS FIELD */}
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <label className="font-bold text-slate-700">Delivery Address:</label>
@@ -1095,7 +1175,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                     />
                   </div>
 
-                  {/* SPECIAL INSTRUCTIONS / NOTE */}
                   <div>
                     <label className="font-bold text-slate-700 block mb-1">Rider Instruction / Landmark (Optional):</label>
                     <input
@@ -1216,12 +1295,9 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                   <div key={ord.id} className="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 text-xs">
                     <div className="flex justify-between items-start">
                       <div>
-                        {/* Clear Receiver & Booked by distinction */}
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="font-bold text-sm text-white">📦 Deliver to: {ord.customer_name}</h4>
-                        </div>
+                        <h4 className="font-bold text-sm text-white">📦 Deliver to: {ord.customer_name}</h4>
                         <a href={`tel:${ord.customer_phone}`} className="text-xs text-emerald-400 font-bold block mt-0.5">
-                          📞 Call Receiver: {ord.customer_phone}
+                          📞 Call: {ord.customer_phone}
                         </a>
                         {ord.ordered_by && ord.ordered_by !== ord.customer_name && (
                           <p className="text-[10px] text-slate-400 mt-0.5">👤 Ordered By: {ord.ordered_by}</p>
