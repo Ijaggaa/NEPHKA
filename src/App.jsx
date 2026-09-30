@@ -15,6 +15,9 @@ const DEFAULT_PRODUCTS = [
   { id: 'p6', store_id: 'store-2', name: 'Amul Butter (100g)', price: 58, description: 'Pasteurized table butter', in_stock: true }
 ];
 
+// Aapka UPI ID jahan payment aayegi (ise baad mein kabhi bhi badal sakte hain)
+const ADMIN_UPI_ID = 'nephka@upi';
+
 export default function App() {
   const [view, setView] = useState('customer'); // 'customer', 'dukaan', 'rider'
   const [dukaanTab, setDukaanTab] = useState('orders'); // 'orders', 'inventory'
@@ -22,13 +25,17 @@ export default function App() {
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
+  
+  // Checkout Form States
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'upi'
+  const [utrNumber, setUtrNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('All');
 
-  // Form states for adding new product
+  // Inventory States
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
   const [newItemStoreId, setNewItemStoreId] = useState('store-1');
@@ -72,7 +79,6 @@ export default function App() {
     };
   }, []);
 
-  // Cart operations
   const addToCart = (product) => {
     if (product.in_stock === false) return;
     setCart((prev) => {
@@ -92,7 +98,10 @@ export default function App() {
 
   const totalCartAmount = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
 
-  // Order Placement
+  // Dynamic UPI Link & QR Code
+  const upiUrl = `upi://pay?pa=${ADMIN_UPI_ID}&pn=NEPHKA%20Delivery&am=${totalCartAmount}&cu=INR&tn=Order%20Payment`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (cart.length === 0) return alert('Pehle cart mein item jodein!');
@@ -105,7 +114,10 @@ export default function App() {
       address: address,
       items: cart,
       total_amount: totalCartAmount,
-      status: 'placed'
+      status: 'placed',
+      payment_method: paymentMethod === 'upi' ? 'UPI Online' : 'Cash on Delivery',
+      payment_status: paymentMethod === 'upi' ? 'Paid (UPI)' : 'Cash to Collect',
+      utr: utrNumber || null
     };
 
     try {
@@ -118,6 +130,7 @@ export default function App() {
     setIsSubmitting(false);
     alert('🎉 Order successfully place ho gaya! Dukaan & Rider panel par sync ho chuka hai.');
     setCart([]);
+    setUtrNumber('');
   };
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -127,7 +140,6 @@ export default function App() {
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)));
   };
 
-  // Inventory Management Handlers
   const toggleStock = async (prodId, currentStatus) => {
     const updatedStatus = !currentStatus;
     try {
@@ -186,7 +198,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* VIEW 1: CUSTOMER VIEW */}
+      {/* VIEW 1: CUSTOMER APP */}
       {view === 'customer' && (
         <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
           <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-4 rounded-2xl text-white shadow-lg">
@@ -208,7 +220,7 @@ export default function App() {
             ))}
           </div>
 
-          {/* Stores & Products List */}
+          {/* Stores & Products */}
           <div className="space-y-4">
             {stores
               .filter((st) => activeTab === 'All' || st.category === activeTab)
@@ -261,11 +273,12 @@ export default function App() {
               ))}
           </div>
 
-          {/* Cart & Checkout */}
+          {/* Cart & Checkout with UPI */}
           {cart.length > 0 && (
-            <div className="bg-white rounded-2xl p-4 shadow-xl border border-orange-100 space-y-3">
+            <div className="bg-white rounded-2xl p-4 shadow-xl border border-orange-100 space-y-4">
               <h3 className="font-bold text-sm text-slate-800 border-b pb-2">Delivery Details & Bill (₹{totalCartAmount})</h3>
-              <form onSubmit={handlePlaceOrder} className="space-y-2 text-xs">
+              
+              <form onSubmit={handlePlaceOrder} className="space-y-3 text-xs">
                 <input
                   type="text"
                   placeholder="Aapka Naam"
@@ -290,12 +303,69 @@ export default function App() {
                   onChange={(e) => setAddress(e.target.value)}
                   className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-orange-500 outline-none"
                 />
+
+                {/* PAYMENT MODE SELECTOR */}
+                <div className="pt-2">
+                  <p className="font-bold text-slate-700 mb-2">Payment Mode Chunein:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('cod')}
+                      className={`p-2.5 rounded-xl border text-center font-bold transition ${
+                        paymentMethod === 'cod'
+                          ? 'border-orange-600 bg-orange-50 text-orange-700 shadow-sm'
+                          : 'border-slate-200 bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      💵 Cash on Delivery
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('upi')}
+                      className={`p-2.5 rounded-xl border text-center font-bold transition ${
+                        paymentMethod === 'upi'
+                          ? 'border-emerald-600 bg-emerald-50 text-emerald-700 shadow-sm'
+                          : 'border-slate-200 bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      ⚡ Pay via UPI / QR
+                    </button>
+                  </div>
+                </div>
+
+                {/* UPI DETAILS & DYNAMIC QR */}
+                {paymentMethod === 'upi' && (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center space-y-2">
+                    <p className="text-xs font-bold text-emerald-800">Scan & Pay ₹{totalCartAmount}</p>
+                    <div className="flex justify-center py-1">
+                      <img
+                        src={qrCodeUrl}
+                        alt="UPI Payment QR"
+                        className="w-36 h-36 border-2 border-white rounded-lg shadow-sm"
+                      />
+                    </div>
+                    <a
+                      href={upiUrl}
+                      className="inline-block w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-sm transition"
+                    >
+                      📱 Open GPay / PhonePe / Paytm
+                    </a>
+                    <input
+                      type="text"
+                      placeholder="Transaction / UTR Number (Optional)"
+                      value={utrNumber}
+                      onChange={(e) => setUtrNumber(e.target.value)}
+                      className="w-full p-2 rounded-lg border bg-white text-xs outline-none text-center"
+                    />
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-md transition disabled:opacity-50"
+                  className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-sm shadow-md transition disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Placing Order...' : `Order Place Karein • ₹${totalCartAmount} (COD / UPI)`}
+                  {isSubmitting ? 'Placing Order...' : `Order Confirm Karein • ₹${totalCartAmount}`}
                 </button>
               </form>
             </div>
@@ -303,7 +373,7 @@ export default function App() {
         </main>
       )}
 
-      {/* VIEW 2: DUKAAN PANEL (Orders & Inventory) */}
+      {/* VIEW 2: DUKAAN PANEL */}
       {view === 'dukaan' && (
         <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
           <div className="bg-slate-900 text-white p-4 rounded-2xl space-y-3">
@@ -312,7 +382,6 @@ export default function App() {
               <span className="text-xs bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-md">Live Store</span>
             </div>
             
-            {/* Dukaan Sub Tabs */}
             <div className="grid grid-cols-2 bg-slate-800 p-1 rounded-xl text-xs font-bold gap-1">
               <button
                 onClick={() => setDukaanTab('orders')}
@@ -329,7 +398,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* DUKAAN SUB-TAB 1: LIVE ORDERS */}
           {dukaanTab === 'orders' && (
             <div className="space-y-3">
               {orders.length === 0 ? (
@@ -343,7 +411,14 @@ export default function App() {
                         <p className="text-xs text-slate-500">📞 {ord.customer_phone}</p>
                         <p className="text-xs text-slate-600 mt-1">📍 {ord.address}</p>
                       </div>
-                      <span className="text-xs font-bold px-2 py-1 rounded-md bg-amber-100 text-amber-800 uppercase">{ord.status}</span>
+                      <div className="text-right">
+                        <span className="text-xs font-bold px-2 py-1 rounded-md bg-amber-100 text-amber-800 uppercase block mb-1">
+                          {ord.status}
+                        </span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${ord.payment_method?.includes('UPI') ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}`}>
+                          {ord.payment_method || 'COD'}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="border-t border-dashed pt-2">
@@ -354,8 +429,8 @@ export default function App() {
                         </div>
                       ))}
                       <div className="flex justify-between font-bold text-xs pt-1 border-t mt-1">
-                        <span>Total</span>
-                        <span>₹{ord.total_amount}</span>
+                        <span>Total ({ord.payment_status || 'Cash to Collect'})</span>
+                        <span className="text-orange-600">₹{ord.total_amount}</span>
                       </div>
                     </div>
 
@@ -375,10 +450,8 @@ export default function App() {
             </div>
           )}
 
-          {/* DUKAAN SUB-TAB 2: INVENTORY & STOCK MANAGER */}
           {dukaanTab === 'inventory' && (
             <div className="space-y-4">
-              {/* Add New Product Box */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
                 <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700">➕ Naya Item Menu Mein Jodein</h3>
                 <form onSubmit={handleAddNewProduct} className="space-y-2 text-xs">
@@ -393,7 +466,7 @@ export default function App() {
                   </select>
                   <input
                     type="text"
-                    placeholder="Item ka Naam (e.g. Rasgulla, Bread, Maggi)"
+                    placeholder="Item ka Naam"
                     required
                     value={newItemName}
                     onChange={(e) => setNewItemName(e.target.value)}
@@ -416,7 +489,6 @@ export default function App() {
                 </form>
               </div>
 
-              {/* Items List with Live Stock & Price Edit */}
               <div className="space-y-2">
                 <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 px-1">Live Stock & Rates</h3>
                 {products.map((item) => {
@@ -436,7 +508,6 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Stock Switch Toggle Button */}
                       <button
                         onClick={() => toggleStock(item.id, isAvailable)}
                         className={`text-xs font-bold px-3 py-1.5 rounded-lg transition border ${
@@ -480,10 +551,23 @@ export default function App() {
                       <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700 uppercase">{ord.status}</span>
                     </div>
 
-                    <div className="bg-slate-50 p-2 rounded-lg text-xs">
+                    <div className="bg-slate-50 p-2 rounded-lg text-xs space-y-1">
                       <p className="font-semibold text-slate-700">Drop Address:</p>
                       <p className="text-slate-600">{ord.address}</p>
-                      <p className="font-bold text-emerald-700 mt-1">Cash Collect: ₹{ord.total_amount}</p>
+                      
+                      {/* PAYMENT STATUS BADGE FOR RIDER */}
+                      <div className="mt-2 pt-2 border-t flex justify-between items-center">
+                        <span className="font-bold text-slate-600">Payment Status:</span>
+                        {ord.payment_method?.includes('UPI') ? (
+                          <span className="px-2 py-1 rounded bg-emerald-100 text-emerald-800 font-extrabold text-xs">
+                            ✅ ONLINE PAID (₹0 Collect)
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 rounded bg-amber-100 text-amber-900 font-extrabold text-xs">
+                            💵 CASH COLLECT: ₹{ord.total_amount}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
