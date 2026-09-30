@@ -9,8 +9,8 @@ const DEFAULT_STORES = [
 ];
 
 const DEFAULT_PRODUCTS = [
-  { id: 'p1', store_id: 'store-1', name: 'Desi Ghee Kurkuri Jalebi', price: 80, mrp: 110, unit: '250 gm', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=80', in_stock: true },
-  { id: 'p2', store_id: 'store-1', name: 'Special Aloo Matar Samosa (2 Pcs)', price: 30, mrp: 40, unit: '2 Pcs with Chutney', image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p1', store_id: 'store-1', name: 'Desi Ghee Kurkuri Jalebi', price: 80, mrp: 110, unit: '250 gm (Taaza)', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=80', in_stock: true },
+  { id: 'p2', store_id: 'store-1', name: 'Special Aloo Matar Samosa (2 Pcs)', price: 30, mrp: 40, unit: '2 Pcs + Chutney', image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=80', in_stock: true },
   { id: 'p3', store_id: 'store-1', name: 'Shahi Mawa Gulab Jamun Box', price: 70, mrp: 90, unit: '4 Pcs Box', image: 'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?w=500&auto=format&fit=crop&q=80', in_stock: true },
   { id: 'p4', store_id: 'store-1', name: 'Kaju Katli Special Vark', price: 230, mrp: 270, unit: '250 gm Pack', image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&auto=format&fit=crop&q=80', in_stock: true },
   { id: 'p5', store_id: 'store-2', name: 'Fresh Cow Milk Pouch', price: 65, mrp: 68, unit: '1 Litre Pouch', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80', in_stock: true },
@@ -32,14 +32,12 @@ const PHOTO_PRESETS = [
   { label: '🥔 Sabzi', url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500' }
 ];
 
-// SYNCHRONIZED AUDIO FOR 2-SECOND FLIGHT & BULLSEYE IMPACT
 const playArrowFlightAndImpact = () => {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
 
-    // 1. Bow String Tension & Release Whoosh (At 0.4s)
     setTimeout(() => {
       const osc1 = ctx.createOscillator();
       const gain1 = ctx.createGain();
@@ -54,7 +52,6 @@ const playArrowFlightAndImpact = () => {
       osc1.stop(ctx.currentTime + 0.8);
     }, 400);
 
-    // 2. High-Speed Air Whistle during 2-Second Flight (At 1.2s)
     setTimeout(() => {
       const oscFly = ctx.createOscillator();
       const gainFly = ctx.createGain();
@@ -69,7 +66,6 @@ const playArrowFlightAndImpact = () => {
       oscFly.stop(ctx.currentTime + 0.9);
     }, 1200);
 
-    // 3. Exact Impact Sound at Target (Exactly after 2.4s from start)
     setTimeout(() => {
       const oscImpact = ctx.createOscillator();
       const gainImpact = ctx.createGain();
@@ -116,7 +112,6 @@ export default function App() {
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [orders, setOrders] = useState([]);
 
-  // Dhanush-Teer 2-Second Flight State
   const [showArrowAnimation, setShowArrowAnimation] = useState(false);
   const [targetStoreInfo, setTargetStoreInfo] = useState(null);
 
@@ -134,7 +129,6 @@ export default function App() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState(null);
   
-  // Recipient details
   const [receiverName, setReceiverName] = useState('');
   const [receiverPhone, setReceiverPhone] = useState('');
   const [deliveryNote, setDeliveryNote] = useState('');
@@ -444,7 +438,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     setCart((prev) => prev.map((i) => (i.id === prodId ? { ...i, qty: i.qty - 1 } : i)).filter((i) => i.qty > 0));
   };
 
-  // --- SUBMIT WITH ACCURATE 2-SECOND FLIGHT TIME ---
   const handlePlaceOrderSubmit = async (e) => {
     e.preventDefault();
 
@@ -485,12 +478,10 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
       await supabase.from('orders').insert([orderRecord]);
     } catch {}
 
-    // Show Dhanush-Teer Animation and play synchronized sound
     setShowCheckout(false);
     setShowArrowAnimation(true);
     playArrowFlightAndImpact();
 
-    // Close animation and land on tracking after arrow hits target (~2.9s)
     setTimeout(() => {
       setOrders((prev) => [orderRecord, ...prev]);
       setActiveOrderId(orderRecord.id);
@@ -529,29 +520,34 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
   const trackStep = trackedOrder?.status === 'delivered' ? 4 : trackedOrder?.status === 'out_for_delivery' ? 3 : trackedOrder?.status === 'accepted' ? 2 : 1;
   const grossSalesVolume = orders.reduce((acc, o) => acc + Number(o.total_amount || 0), 0);
 
-  // LOGIN SCREEN
+  // ========================================================
+  // LOGIN SCREEN (High-End Clean Quick Commerce Theme)
+  // ========================================================
   if (!currentUser && currentView !== 'poster') {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans select-none">
+      <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-4 font-sans select-none">
         <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-100">
+          
           <div className="text-center space-y-1">
-            <div className="w-12 h-12 bg-orange-600 rounded-2xl mx-auto flex items-center justify-center text-white font-black text-2xl shadow-md">
-              N
+            <div className="w-14 h-14 bg-[#F8CB46] text-slate-950 rounded-2xl mx-auto flex items-center justify-center font-black text-2xl shadow-md border-2 border-slate-950">
+              ⚡
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-2">NEPHKA</h1>
-            <p className="text-xs text-slate-500 font-semibold">⚡ 15-Minute Hyperlocal Superfast Delivery</p>
+            <h1 className="text-2xl font-black text-slate-950 tracking-tight mt-2">NEPHKA</h1>
+            <p className="text-xs text-emerald-800 font-bold bg-emerald-50 inline-block px-3 py-0.5 rounded-full border border-emerald-200">
+              ⚡ 15-Minute Instant Local Delivery
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 bg-slate-100 p-1 rounded-2xl text-xs font-bold gap-1">
+          <div className="grid grid-cols-2 bg-slate-100 p-1 rounded-2xl text-xs font-black gap-1">
             <button
               onClick={() => setAuthRole('customer')}
-              className={`py-2.5 rounded-xl transition ${authRole === 'customer' ? 'bg-orange-600 text-white shadow' : 'text-slate-600'}`}
+              className={`py-2.5 rounded-xl transition ${authRole === 'customer' ? 'bg-[#0C831F] text-white shadow-md' : 'text-slate-600'}`}
             >
               👤 Customer (Grahak)
             </button>
             <button
               onClick={() => setAuthRole('dukaan')}
-              className={`py-2.5 rounded-xl transition ${authRole === 'dukaan' ? 'bg-orange-600 text-white shadow' : 'text-slate-600'}`}
+              className={`py-2.5 rounded-xl transition ${authRole === 'dukaan' ? 'bg-[#0C831F] text-white shadow-md' : 'text-slate-600'}`}
             >
               🏪 Dukaan (Partner KYC)
             </button>
@@ -559,25 +555,25 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 
           {authRole === 'customer' && (
             <form onSubmit={handleCustomerLogin} className="space-y-3.5 text-xs">
-              <div className="bg-orange-50/60 p-3 rounded-xl border border-orange-100 text-orange-900">
-                <p className="font-bold">🛒 Quick Customer Access</p>
-                <p className="text-[11px] text-orange-700">Apne shehar ki dukaano se 15 min mein samaan ghar mangwayein.</p>
+              <div className="bg-emerald-50/80 p-3 rounded-2xl border border-emerald-100 text-emerald-950">
+                <p className="font-extrabold text-[13px]">🛒 Instant Delivery Access</p>
+                <p className="text-[11px] text-emerald-800 font-medium">Shahar ki dukaano se 15 min mein direct delivery payein.</p>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Aapka Asli Naam:</label>
+                <label className="font-bold text-slate-800 block mb-1">Aapka Asli Naam:</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Ramesh Kumar"
+                  placeholder="e.g. Pardeep Kumar"
                   value={custNameInput}
                   onChange={(e) => setCustNameInput(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-orange-500"
+                  className="w-full p-3 rounded-xl border border-slate-200 outline-none font-bold text-slate-900 focus:border-[#0C831F] focus:ring-1 focus:ring-[#0C831F]"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Mobile Number (WhatsApp):</label>
+                <label className="font-bold text-slate-800 block mb-1">Mobile Number (WhatsApp):</label>
                 <input
                   type="tel"
                   maxLength={10}
@@ -585,15 +581,15 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                   placeholder="10-digit Mobile Number"
                   value={custPhoneInput}
                   onChange={(e) => setCustPhoneInput(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-orange-500"
+                  className="w-full p-3 rounded-xl border border-slate-200 outline-none font-bold text-slate-900 focus:border-[#0C831F] focus:ring-1 focus:ring-[#0C831F]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-2xl text-sm shadow-md transition active:scale-98"
+                className="w-full py-3.5 bg-[#0C831F] hover:bg-[#0A6C19] text-white font-black rounded-2xl text-sm shadow-lg shadow-emerald-700/20 transition active:scale-98"
               >
-                App Kholein ➔
+                Start Shopping ➔
               </button>
             </form>
           )}
@@ -604,14 +600,14 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                 <button
                   type="button"
                   onClick={() => setDukaanAuthMode('login')}
-                  className={`${dukaanAuthMode === 'login' ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-slate-400'}`}
+                  className={`${dukaanAuthMode === 'login' ? 'text-[#0C831F] border-b-2 border-[#0C831F] pb-1' : 'text-slate-400'}`}
                 >
                   Existing Store Login
                 </button>
                 <button
                   type="button"
                   onClick={() => setDukaanAuthMode('register')}
-                  className={`${dukaanAuthMode === 'register' ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-slate-400'}`}
+                  className={`${dukaanAuthMode === 'register' ? 'text-[#0C831F] border-b-2 border-[#0C831F] pb-1' : 'text-slate-400'}`}
                 >
                   Nayi Dukaan Register (KYC)
                 </button>
@@ -654,7 +650,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               {dukaanAuthMode === 'register' && (
                 <form onSubmit={handleDukaanKycRegister} className="space-y-2.5 text-xs max-h-[62vh] overflow-y-auto pr-1">
                   <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100 text-emerald-900 text-[11px]">
-                    <span className="font-bold">🛡️️ Merchant KYC Verification:</span>
+                    <span className="font-bold">🛡 Merchant KYC Verification:</span>
                     <p>Dukaan link karne ke liye Aadhaar Card aur PAN Card number bharna zaroori hai.</p>
                   </div>
 
@@ -738,7 +734,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 
                   <button
                     type="submit"
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs shadow-md transition"
+                    className="w-full py-3 bg-[#0C831F] hover:bg-[#0A6C19] text-white font-black rounded-2xl text-xs shadow-md transition"
                   >
                     Verify KYC & Register Dukaan ➔
                   </button>
@@ -768,16 +764,16 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
     );
   }
 
+  // ========================================================
+  // MAIN APP SHELL (REAL COLORS APPLIED)
+  // ========================================================
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 pb-20 font-sans select-none relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#F4F6FB] text-slate-900 pb-20 font-sans select-none relative overflow-x-hidden">
       
-      {/* ======================================================== */}
-      {/* 🏹 PRECISE 2-SECOND FLIGHT DHANUSH-TEER OVERLAY         */}
-      {/* ======================================================== */}
+      {/* 🏹 DHANUSH-TEER OVERLAY */}
       {showArrowAnimation && (
         <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-hidden">
           <style>{`
-            /* Bow string pull back: 0s to 0.4s */
             @keyframes bowAction {
               0% { transform: translateY(-50%) scale(0.9); }
               20% { transform: translateY(-50%) scale(1.08) rotate(3deg); }
@@ -785,65 +781,21 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               40% { transform: translateY(-50%) scale(0.95) rotate(-2deg); }
               100% { transform: translateY(-50%) scale(0.95); opacity: 0.6; }
             }
-
-            /* Arrow flight: Pulls at 0.1s, fires at 0.4s, travels 2.0s, hits target at 2.4s! */
             @keyframes accurateArrowFlight {
-              0% { 
-                left: 45px; 
-                transform: translateY(-50%) scale(0.9); 
-                opacity: 1; 
-              }
-              15% { 
-                left: 32px; 
-                transform: translateY(-50%) scale(0.95); 
-                opacity: 1; 
-              }
-              18% { 
-                left: 48px; 
-                transform: translateY(-50%) scale(1); 
-                opacity: 1; 
-              }
-              /* 2 Seconds pure travel across screen */
-              85% { 
-                left: calc(100% - 110px); 
-                transform: translateY(-50%) scale(1.1); 
-                opacity: 1; 
-                filter: drop-shadow(0 0 16px #f97316); 
-              }
-              90% { 
-                left: calc(100% - 90px); 
-                transform: translateY(-50%) scale(1); 
-                opacity: 1; 
-              }
-              100% { 
-                left: calc(100% - 90px); 
-                transform: translateY(-50%) scale(1); 
-                opacity: 1; 
-              }
+              0% { left: 45px; transform: translateY(-50%) scale(0.9); opacity: 1; }
+              15% { left: 32px; transform: translateY(-50%) scale(0.95); opacity: 1; }
+              18% { left: 48px; transform: translateY(-50%) scale(1); opacity: 1; }
+              85% { left: calc(100% - 110px); transform: translateY(-50%) scale(1.1); opacity: 1; filter: drop-shadow(0 0 16px #f97316); }
+              90% { left: calc(100% - 90px); transform: translateY(-50%) scale(1); opacity: 1; }
+              100% { left: calc(100% - 90px); transform: translateY(-50%) scale(1); opacity: 1; }
             }
-
-            /* Bullseye impact shake: Triggers at 2.4s (88% of keyframes) */
             @keyframes targetImpactShake {
-              0%, 84% { 
-                transform: translateY(-50%) scale(1); 
-                filter: brightness(1); 
-              }
-              88% { 
-                transform: translateY(-50%) scale(1.35) rotate(-8deg); 
-                filter: brightness(1.8) drop-shadow(0 0 25px #22c55e); 
-              }
-              92% { 
-                transform: translateY(-50%) scale(0.92) rotate(6deg); 
-              }
-              96% { 
-                transform: translateY(-50%) scale(1.1) rotate(-3deg); 
-                filter: drop-shadow(0 0 20px #eab308); 
-              }
-              100% { 
-                transform: translateY(-50%) scale(1) rotate(0deg); 
-              }
+              0%, 84% { transform: translateY(-50%) scale(1); filter: brightness(1); }
+              88% { transform: translateY(-50%) scale(1.35) rotate(-8deg); filter: brightness(1.8) drop-shadow(0 0 25px #22c55e); }
+              92% { transform: translateY(-50%) scale(0.92) rotate(6deg); }
+              96% { transform: translateY(-50%) scale(1.1) rotate(-3deg); filter: drop-shadow(0 0 20px #eab308); }
+              100% { transform: translateY(-50%) scale(1) rotate(0deg); }
             }
-
             @keyframes flameTail {
               0% { width: 0; opacity: 0; }
               20% { width: 40px; opacity: 0.8; }
@@ -852,7 +804,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               90% { width: 0; opacity: 0; }
               100% { width: 0; opacity: 0; }
             }
-
             .animate-bow-action { animation: bowAction 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
             .animate-arrow-flight { animation: accurateArrowFlight 2.8s cubic-bezier(0.2, 0.8, 0.4, 1) forwards; }
             .animate-target-impact { animation: targetImpactShake 2.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
@@ -860,7 +811,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
           `}</style>
 
           <div className="text-center mb-6">
-            <span className="text-[11px] font-black uppercase tracking-widest text-orange-400 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/30">
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#F8CB46] bg-yellow-400/15 px-3 py-1 rounded-full border border-yellow-400/30">
               ⚡ 2-SECOND EXPRESS ARROW STRIKE
             </span>
             <h2 className="text-2xl font-black text-white mt-2 tracking-tight">
@@ -871,12 +822,9 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </p>
           </div>
 
-          {/* Unified Horizontal Flight Runway */}
           <div className="relative w-full max-w-sm h-48 bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden px-4 shadow-2xl">
-            
-            {/* 1. Left: Dhanush (Bow) firmly anchored on left center */}
             <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 animate-bow-action flex flex-col items-center">
-              <svg width="68" height="110" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="68" height="110" viewBox="0 0 100 140" fill="none">
                 <path d="M75 10 C18 42, 18 98, 75 130" stroke="#f97316" strokeWidth="10" strokeLinecap="round"/>
                 <path d="M72 15 C24 44, 24 96, 72 125" stroke="#facc15" strokeWidth="3.5" strokeLinecap="round"/>
                 <line x1="75" y1="10" x2="35" y2="70" stroke="#ffffff" strokeWidth="2.5" />
@@ -885,23 +833,16 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               <span className="text-[9px] font-black text-orange-400 mt-1 uppercase tracking-tight">Dhanush</span>
             </div>
 
-            {/* 2. Center: Flying Teer (Starts exactly on bowstring and flies for 2 seconds) */}
             <div className="absolute top-1/2 z-20 animate-arrow-flight flex items-center pointer-events-none">
-              {/* Sonic Fire Tail */}
               <div className="h-1 bg-gradient-to-r from-transparent via-orange-500 to-amber-300 rounded-full animate-tail -mr-1 shadow-lg" />
-              {/* Arrow SVG */}
-              <svg width="84" height="28" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Arrow Shaft */}
+              <svg width="84" height="28" viewBox="0 0 120 40" fill="none">
                 <line x1="12" y1="20" x2="98" y2="20" stroke="#ffffff" strokeWidth="4.5" strokeLinecap="round" />
                 <line x1="14" y1="20" x2="90" y2="20" stroke="#ea580c" strokeWidth="2.5" />
-                {/* Golden Arrow Head */}
                 <polygon points="94,10 118,20 94,30 101,20" fill="#facc15" stroke="#f97316" strokeWidth="2" />
-                {/* Feathers */}
                 <polygon points="6,20 18,10 24,20 18,30" fill="#38bdf8" />
               </svg>
             </div>
 
-            {/* 3. Right: Dukaan Target Bullseye firmly anchored on right center */}
             <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 animate-target-impact flex flex-col items-center">
               <div className="w-18 h-18 bg-slate-950 border-4 border-emerald-500 rounded-2xl flex flex-col items-center justify-center p-2 shadow-2xl relative">
                 <span className="text-3xl relative z-10">🎯</span>
@@ -911,7 +852,6 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               </div>
               <span className="text-[9px] font-black text-emerald-400 mt-1 uppercase tracking-tight">Target</span>
             </div>
-
           </div>
 
           <div className="w-full max-w-xs bg-slate-900/80 border border-slate-800 rounded-2xl p-3 text-center mt-4">
@@ -919,23 +859,28 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
               🏹 Teer 2 second mein dukaan par lag raha hai...
             </p>
             <p className="text-[10px] text-amber-400 font-semibold mt-0.5">
-              Live order siren dukaandar ke paas pahunch rahi hai!
+              Live order siren dukaandar ke paas baj rahi hai!
             </p>
           </div>
         </div>
       )}
 
-      {/* Top Universal Navbar */}
-      <header className="sticky top-0 z-40 bg-white shadow-xs border-b px-4 py-2.5">
+      {/* TOP HEADER: Clean White + Yellow Brand Badge + Emerald Delivery Pill */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-xs border-b border-slate-200/80 px-4 py-2.5">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-base shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-[#F8CB46] text-slate-950 flex items-center justify-center font-black text-lg shadow-sm border border-slate-900/10">
               N
             </div>
             <div>
-              <p className="text-xs font-black text-slate-900 leading-tight">NEPHKA</p>
-              <p className="text-[10px] text-slate-500 font-semibold truncate max-w-[130px]">
-                {currentUser ? `👤 ${currentUser.name}` : '15-Min Express'}
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-sm font-black text-slate-950 tracking-tight leading-none">NEPHKA</h1>
+                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md leading-none border border-emerald-300">
+                  ⚡ 12 MINS
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 font-bold truncate max-w-[170px] mt-0.5">
+                {currentUser ? `👤 ${currentUser.name}` : 'Rohtak Delivery Hub'}
               </p>
             </div>
           </div>
@@ -944,14 +889,14 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             {currentUser?.role === 'customer' && (
               <button
                 onClick={detectGpsLocation}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-lg text-[11px]"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1 transition"
               >
                 {isLocating ? '...' : '📍 GPS'}
               </button>
             )}
             <button
               onClick={logoutUser}
-              className="bg-rose-50 border border-rose-200 text-rose-700 px-2 py-1 rounded-lg text-[11px] font-bold active:scale-95"
+              className="bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 px-2.5 py-1.5 rounded-xl text-[11px] font-black active:scale-95 transition"
             >
               Logout ➔
             </button>
@@ -966,88 +911,119 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             <button onClick={() => routeTo('customer')} className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">
               ✕ Back to App
             </button>
-            <button onClick={() => window.print()} className="text-xs font-black bg-orange-600 text-white px-4 py-2 rounded-xl shadow-md">
+            <button onClick={() => window.print()} className="text-xs font-black bg-[#0C831F] text-white px-4 py-2 rounded-xl shadow-md">
               🖨️ Print Poster (A4)
             </button>
           </div>
-          <div className="my-auto py-6 border-4 border-orange-600 rounded-3xl p-6 w-full shadow-2xl bg-gradient-to-b from-orange-50/60 to-white">
-            <div className="inline-block bg-orange-600 text-white font-black text-2xl px-5 py-1.5 rounded-2xl mb-2">NEPHKA</div>
-            <h1 className="text-3xl font-black text-slate-900 leading-tight">Ab Dukaan Seedha <br /><span className="text-orange-600">Aapke Ghar Pe!</span></h1>
+          <div className="my-auto py-6 border-4 border-[#0C831F] rounded-3xl p-6 w-full shadow-2xl bg-gradient-to-b from-emerald-50/50 to-white">
+            <div className="inline-block bg-[#F8CB46] text-slate-950 font-black text-2xl px-5 py-1.5 rounded-2xl mb-2 border border-slate-900">NEPHKA</div>
+            <h1 className="text-3xl font-black text-slate-900 leading-tight">Ab Dukaan Seedha <br /><span className="text-[#0C831F]">Aapke Ghar Pe!</span></h1>
             <p className="text-sm font-bold text-slate-600 mt-1">⚡ 15-20 Min Superfast Local Delivery</p>
             <div className="my-6 flex flex-col items-center">
               <div className="p-3 bg-white border-4 border-slate-900 rounded-3xl shadow-xl">
                 <img src={counterStandeeQrUrl} alt="Scan to Order" className="w-56 h-56 object-contain" />
               </div>
-              <p className="text-xs font-black uppercase text-slate-900 mt-2 bg-yellow-300 px-3 py-1 rounded-full">📸 Phone Camera Se Scan Karein</p>
+              <p className="text-xs font-black uppercase text-slate-900 mt-2 bg-[#F8CB46] px-3 py-1 rounded-full border border-slate-900">📸 Phone Camera Se Scan Karein</p>
             </div>
             <p className="text-emerald-700 font-black text-xs">✓ Free Delivery ₹149+ Orders Par!</p>
           </div>
         </div>
       )}
 
-      {/* VIEW 2: CUSTOMER SHOPPING VIEW */}
+      {/* VIEW 2: CUSTOMER VIEW (REAL QUICK COMMERCE LOOK) */}
       {currentView === 'customer' && (
-        <main className="max-w-md mx-auto px-3 pt-3 space-y-3">
-          <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 p-4 rounded-2xl text-white shadow-md relative overflow-hidden">
-            <span className="text-[10px] font-extrabold uppercase bg-white/25 px-2 py-0.5 rounded-full">Superfast Local</span>
-            <h2 className="text-xl font-black mt-1">NEPHKA 15-Min Store</h2>
-            <p className="text-xs text-orange-100 font-medium">Shuddh Mithai, Dairy, Dawa & Sabzi</p>
+        <main className="max-w-md mx-auto px-3.5 pt-3 space-y-3.5">
+          
+          {/* Top Promotional Hero Card (Zomato/Blinkit Golden Gradient) */}
+          <div className="bg-gradient-to-r from-[#F8CB46] via-amber-400 to-orange-400 p-4 rounded-3xl text-slate-950 shadow-md relative overflow-hidden border border-yellow-500/20">
+            <div className="relative z-10">
+              <span className="text-[10px] font-black uppercase bg-slate-950 text-white px-2.5 py-0.5 rounded-full tracking-wider">
+                ⚡ 15 MIN STORE
+              </span>
+              <h2 className="text-xl font-black mt-1.5 leading-tight tracking-tight">
+                Apna Shehar • Aapki Dukaan
+              </h2>
+              <p className="text-xs text-slate-900 font-bold opacity-90 mt-0.5">
+                Shuddh Desi Mithai, Dairy, Dawa & Taaza Sabzi
+              </p>
+            </div>
+            <div className="absolute -right-3 -bottom-5 text-7xl opacity-20 font-black">⚡</div>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-bold no-scrollbar">
+          {/* Category Tabs: Jet Black Active Pill & Clean White Inactives */}
+          <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-black no-scrollbar">
             {['All', 'Sweets & Snacks', 'Kirana & Milk', 'Pharmacy', 'Fruits & Vegetables'].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveTab(cat)}
-                className={`px-4 py-2 rounded-xl whitespace-nowrap transition ${activeTab === cat ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200'}`}
+                className={`px-4 py-2 rounded-2xl whitespace-nowrap transition-all shadow-xs ${
+                  activeTab === cat 
+                    ? 'bg-slate-950 text-white shadow-md scale-102' 
+                    : 'bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-50'
+                }`}
               >
                 {cat}
               </button>
             ))}
           </div>
 
+          {/* Product Cards Grid: Crisp White, Rounded-2xl, Elevated Real Colors */}
           <div className="space-y-4">
             {stores.filter((st) => activeTab === 'All' || st.category === activeTab).map((store) => {
               const storeProducts = products.filter((p) => p.store_id === store.id);
               if (storeProducts.length === 0) return null;
               return (
-                <div key={store.id} className="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/80">
-                  <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+                <div key={store.id} className="bg-white rounded-3xl p-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-100">
+                  <div className="flex justify-between items-center mb-3 pb-2.5 border-b border-slate-100">
                     <div>
-                      <h3 className="font-extrabold text-sm text-slate-900">{store.name}</h3>
-                      <p className="text-[11px] text-slate-500 font-medium">⭐ {store.rating} • {store.category}</p>
+                      <h3 className="font-black text-sm text-slate-950">{store.name}</h3>
+                      <p className="text-[11px] text-slate-500 font-bold">⭐ {store.rating} • {store.category}</p>
                     </div>
-                    <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md">⏱ {store.delivery_time}</span>
+                    <span className="text-[10px] font-black text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
+                      ⏱ {store.delivery_time}
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2.5">
                     {storeProducts.map((item) => {
                       const inCart = cart.find((i) => i.id === item.id);
                       return (
-                        <div key={item.id} className="bg-slate-50/60 rounded-xl p-2.5 border border-slate-100 flex flex-col justify-between">
+                        <div key={item.id} className="bg-slate-50/70 rounded-2xl p-2.5 border border-slate-100 flex flex-col justify-between hover:border-slate-200 transition">
                           <div>
-                            <div className="w-full h-28 bg-white rounded-lg overflow-hidden border border-slate-100 mb-2 relative">
+                            <div className="w-full h-28 bg-white rounded-xl overflow-hidden border border-slate-100 mb-2 relative">
                               <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                               {item.mrp > item.price && (
-                                <span className="absolute top-1 left-1 bg-emerald-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded shadow">
+                                <span className="absolute top-1 left-1 bg-blue-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded-md shadow-xs">
                                   {Math.round(((item.mrp - item.price) / item.mrp) * 100)}% OFF
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase">{item.unit}</p>
-                            <h4 className="text-xs font-bold text-slate-800 line-clamp-2 mt-0.5">{item.name}</h4>
+                            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-tight">{item.unit}</p>
+                            <h4 className="text-xs font-extrabold text-slate-900 line-clamp-2 mt-0.5 leading-snug">{item.name}</h4>
                           </div>
 
                           <div className="flex justify-between items-center mt-3 pt-1">
-                            <span className="text-xs font-black text-slate-900">₹{item.price}</span>
+                            <div>
+                              <span className="text-xs font-black text-slate-950">₹{item.price}</span>
+                              {item.mrp > item.price && (
+                                <span className="text-[10px] text-slate-400 line-through font-bold ml-1">₹{item.mrp}</span>
+                              )}
+                            </div>
+
+                            {/* BLINKIT SIGNATURE EMERALD GREEN ADD BUTTON */}
                             {inCart ? (
-                              <div className="flex items-center gap-2 bg-emerald-700 text-white font-black text-xs px-2 py-1 rounded-lg">
-                                <button onClick={() => removeItemFromCart(item.id)} className="px-1 text-emerald-200">-</button>
+                              <div className="flex items-center gap-2 bg-[#0C831F] text-white font-black text-xs px-2.5 py-1 rounded-xl shadow-xs">
+                                <button onClick={() => removeItemFromCart(item.id)} className="px-1 text-emerald-200 active:scale-90">-</button>
                                 <span>{inCart.qty}</span>
-                                <button onClick={() => addItemToCart(item)} className="px-1 text-emerald-200">+</button>
+                                <button onClick={() => addItemToCart(item)} className="px-1 text-emerald-200 active:scale-90">+</button>
                               </div>
                             ) : (
-                              <button onClick={() => addItemToCart(item)} className="bg-white border-2 border-emerald-600 text-emerald-700 text-xs font-black px-3 py-1 rounded-lg">ADD</button>
+                              <button
+                                onClick={() => addItemToCart(item)}
+                                className="bg-white border-[1.5px] border-[#0C831F] text-[#0C831F] hover:bg-[#0C831F] hover:text-white text-xs font-black px-3.5 py-1 rounded-xl shadow-xs transition active:scale-95 uppercase tracking-wide"
+                              >
+                                ADD
+                              </button>
                             )}
                           </div>
                         </div>
@@ -1059,50 +1035,60 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             })}
           </div>
 
-          {/* Floating Cart Strip */}
+          {/* FLOATING BOTTOM CART STRIP (REAL BLINKIT EMERALD GREEN) */}
           {cart.length > 0 && !showCheckout && (
             <div className="fixed bottom-3 left-0 right-0 z-40 px-4">
-              <div onClick={handleOpenCheckout} className="max-w-md mx-auto bg-emerald-600 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500">
-                <div>
-                  <p className="text-sm font-black leading-tight">₹{grandTotalAmount} • {totalCartCount} ITEMS</p>
-                  <p className="text-[10px] text-emerald-200 font-bold">{deliveryFee === 0 ? '✓ Free Delivery Applied' : 'Add more for Free Delivery'}</p>
+              <div 
+                onClick={handleOpenCheckout} 
+                className="max-w-md mx-auto bg-[#0C831F] hover:bg-[#0A6C19] text-white p-3 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-emerald-500 transition active:scale-99"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-emerald-950/80 text-white font-black text-xs px-2.5 py-1.5 rounded-xl border border-emerald-500/30">
+                    🛒 {totalCartCount} ITEMS
+                  </div>
+                  <div>
+                    <p className="text-sm font-black leading-tight text-white">₹{grandTotalAmount}</p>
+                    <p className="text-[10px] text-emerald-200 font-bold">
+                      {deliveryFee === 0 ? '✓ Free Delivery Applied' : 'Add more for Free Delivery'}
+                    </p>
+                  </div>
                 </div>
-                <span className="font-black text-xs bg-emerald-800/80 px-3 py-1.5 rounded-xl">View Bill ➔</span>
+                <span className="font-black text-xs bg-white text-[#0C831F] px-3.5 py-1.5 rounded-xl shadow-sm">
+                  View Bill ➔
+                </span>
               </div>
             </div>
           )}
 
-          {/* Checkout Slide-Up Sheet */}
+          {/* CHECKOUT MODAL SHEET */}
           {showCheckout && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-end justify-center">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-end justify-center">
               <div className="bg-white rounded-t-3xl max-w-md w-full p-4 max-h-[92vh] overflow-y-auto space-y-4 shadow-2xl">
                 <div className="flex justify-between items-center border-b pb-3">
                   <div>
-                    <h3 className="font-black text-base text-slate-800">Review & Place Order</h3>
-                    <p className="text-xs text-slate-500 font-semibold">{totalCartCount} Items • Bill ₹{grandTotalAmount}</p>
+                    <h3 className="font-black text-base text-slate-950">Review & Place Order</h3>
+                    <p className="text-xs text-slate-500 font-bold">{totalCartCount} Items • Bill ₹{grandTotalAmount}</p>
                   </div>
-                  <button onClick={() => setShowCheckout(false)} className="w-8 h-8 rounded-full bg-slate-100 font-bold">✕</button>
+                  <button onClick={() => setShowCheckout(false)} className="w-8 h-8 rounded-full bg-slate-100 font-bold text-slate-700">✕</button>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-2xl border space-y-1.5 text-xs">
+                <div className="bg-slate-50 p-3.5 rounded-2xl border space-y-1.5 text-xs">
                   {cart.map((item) => (
-                    <div key={item.id} className="flex justify-between text-slate-700">
+                    <div key={item.id} className="flex justify-between text-slate-700 font-semibold">
                       <span>{item.name} x {item.qty}</span>
-                      <span className="font-bold">₹{item.price * item.qty}</span>
+                      <span className="font-bold text-slate-950">₹{item.price * item.qty}</span>
                     </div>
                   ))}
-                  <div className="border-t pt-1 flex justify-between font-black text-sm">
+                  <div className="border-t pt-1.5 flex justify-between font-black text-sm text-slate-950">
                     <span>Payable Total:</span>
-                    <span className="text-emerald-700">₹{grandTotalAmount}</span>
+                    <span className="text-[#0C831F]">₹{grandTotalAmount}</span>
                   </div>
                 </div>
 
                 <form onSubmit={handlePlaceOrderSubmit} className="space-y-3 text-xs">
-                  
-                  {/* Recipient Details */}
-                  <div className="bg-orange-50/70 border border-orange-200/80 p-3 rounded-2xl space-y-2">
+                  <div className="bg-emerald-50/70 border border-emerald-200/80 p-3 rounded-2xl space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="font-black text-orange-950 flex items-center gap-1.5">
+                      <span className="font-black text-emerald-950 flex items-center gap-1.5">
                         <span>📦</span> Kisko Delivery Deni Hai?
                       </span>
                       <button
@@ -1117,7 +1103,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                             setReceiverPhone(currentUser?.phone || '');
                           }
                         }}
-                        className="text-[11px] font-bold text-orange-700 underline"
+                        className="text-[11px] font-bold text-emerald-800 underline"
                       >
                         {isOrderingForOther ? 'Khud Ke Liye Mangwayein' : 'Kisi Aur Ke Liye?'}
                       </button>
@@ -1160,7 +1146,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                       <button
                         type="button"
                         onClick={detectGpsLocation}
-                        className="text-[11px] font-black text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-md"
+                        className="text-[11px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md"
                       >
                         {isLocating ? 'GPS...' : '📍 Use Current Location'}
                       </button>
@@ -1182,7 +1168,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                       placeholder="e.g. Near Shiv Mandir / Gate par de dein"
                       value={deliveryNote}
                       onChange={(e) => setDeliveryNote(e.target.value)}
-                      className="w-full p-2.5 rounded-xl border outline-none"
+                      className="w-full p-2.5 rounded-xl border outline-none font-medium"
                     />
                   </div>
 
@@ -1190,14 +1176,14 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('cod')}
-                      className={`py-2 rounded-xl border font-bold ${paymentMethod === 'cod' ? 'border-emerald-600 bg-emerald-50 text-emerald-800' : 'bg-slate-50'}`}
+                      className={`py-2.5 rounded-xl border font-black ${paymentMethod === 'cod' ? 'border-[#0C831F] bg-emerald-50 text-[#0C831F]' : 'bg-slate-50 text-slate-600'}`}
                     >
                       💵 Cash on Delivery
                     </button>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('upi')}
-                      className={`py-2 rounded-xl border font-bold ${paymentMethod === 'upi' ? 'border-emerald-600 bg-emerald-50 text-emerald-800' : 'bg-slate-50'}`}
+                      className={`py-2.5 rounded-xl border font-black ${paymentMethod === 'upi' ? 'border-[#0C831F] bg-emerald-50 text-[#0C831F]' : 'bg-slate-50 text-slate-600'}`}
                     >
                       ⚡ UPI / GPay
                     </button>
@@ -1206,7 +1192,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                   {paymentMethod === 'upi' && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center space-y-2">
                       <img src={upiQrCodeUrl} alt="UPI QR" className="w-32 h-32 mx-auto border rounded-xl" />
-                      <a href={upiIntentUrl} className="block w-full py-2 bg-emerald-600 text-white font-black rounded-xl">
+                      <a href={upiIntentUrl} className="block w-full py-2 bg-[#0C831F] text-white font-black rounded-xl">
                         📱 Open GPay / PhonePe
                       </a>
                     </div>
@@ -1215,7 +1201,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-98"
+                    className="w-full py-3.5 bg-[#0C831F] hover:bg-[#0A6C19] text-white font-black rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-98"
                   >
                     <span>🏹</span>
                     <span>{isSubmitting ? 'Firing Order...' : `Confirm & Shoot Order • ₹${grandTotalAmount}`}</span>
@@ -1225,7 +1211,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
             </div>
           )}
 
-          {/* Tracking Bar */}
+          {/* TRACKING BAR */}
           {trackedOrder && (
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t p-4 max-w-md mx-auto rounded-t-3xl shadow-2xl space-y-2">
               <div className="flex justify-between items-center">
@@ -1239,13 +1225,13 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                 </div>
                 <button
                   onClick={() => sendWhatsAppReceipt(trackedOrder)}
-                  className="text-xs bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-xs"
+                  className="text-xs bg-[#0C831F] text-white font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-xs"
                 >
                   💬 WhatsApp
                 </button>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full flex">
-                <div className={`h-full bg-emerald-500 ${trackStep === 1 ? 'w-1/4' : trackStep === 2 ? 'w-2/4' : trackStep === 3 ? 'w-3/4' : 'w-full'}`} />
+                <div className={`h-full bg-[#0C831F] ${trackStep === 1 ? 'w-1/4' : trackStep === 2 ? 'w-2/4' : trackStep === 3 ? 'w-3/4' : 'w-full'}`} />
               </div>
             </div>
           )}
@@ -1269,7 +1255,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
 
           <div className="flex justify-between items-center pb-2 border-b border-slate-800">
             <div>
-              <h1 className="text-lg font-black text-orange-500">🏪 DUKAAN DASHBOARD</h1>
+              <h1 className="text-lg font-black text-[#F8CB46]">🏪 DUKAAN DASHBOARD</h1>
               <p className="text-[11px] text-slate-400">{currentUser?.name || 'Verified Merchant'}</p>
             </div>
             <button onClick={() => routeTo('customer')} className="text-xs bg-slate-800 text-slate-300 font-bold px-2.5 py-1.5 rounded-lg border border-slate-700">
@@ -1278,10 +1264,10 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
           </div>
 
           <div className="grid grid-cols-2 bg-slate-800 p-1 rounded-xl text-xs font-bold gap-1">
-            <button onClick={() => setDukaanTab('orders')} className={`py-2 rounded-lg ${dukaanTab === 'orders' ? 'bg-orange-600 text-white' : 'text-slate-400'}`}>
+            <button onClick={() => setDukaanTab('orders')} className={`py-2 rounded-lg ${dukaanTab === 'orders' ? 'bg-[#0C831F] text-white' : 'text-slate-400'}`}>
               Orders ({orders.filter((o) => o.status !== 'delivered').length})
             </button>
-            <button onClick={() => setDukaanTab('menu')} className={`py-2 rounded-lg ${dukaanTab === 'menu' ? 'bg-orange-600 text-white' : 'text-slate-400'}`}>
+            <button onClick={() => setDukaanTab('menu')} className={`py-2 rounded-lg ${dukaanTab === 'menu' ? 'bg-[#0C831F] text-white' : 'text-slate-400'}`}>
               Manage Menu & Add
             </button>
           </div>
@@ -1306,7 +1292,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                           <p className="text-[10px] text-amber-300 bg-slate-900 px-2 py-0.5 rounded mt-1">📝 Note: {ord.delivery_note}</p>
                         )}
                       </div>
-                      <span className="font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 uppercase">{ord.status}</span>
+                      <span className="font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 uppercase">{ord.status}</span>
                     </div>
                     
                     <p className="text-slate-300">📍 {ord.address}</p>
@@ -1317,11 +1303,11 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2 pt-1">
-                      <button onClick={() => sendWhatsAppReceipt(ord)} className="py-2 bg-emerald-600 font-bold rounded-lg text-white">
+                      <button onClick={() => sendWhatsAppReceipt(ord)} className="py-2 bg-[#0C831F] font-bold rounded-lg text-white">
                         💬 WhatsApp Slip
                       </button>
                       {ord.status === 'placed' && (
-                        <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="py-2 bg-orange-600 font-bold rounded-lg text-white">
+                        <button onClick={() => updateOrderStatus(ord.id, 'accepted')} className="py-2 bg-amber-500 hover:bg-amber-600 font-black text-slate-950 rounded-lg">
                           ✓ Accept
                         </button>
                       )}
@@ -1340,20 +1326,20 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
           {dukaanTab === 'menu' && (
             <div className="space-y-4">
               <form onSubmit={handleAddNewItemToDukaan} className="bg-slate-800 p-3 rounded-xl space-y-2 text-xs border border-slate-700">
-                <p className="font-black text-sm text-orange-400">➕ Add Item with Photo</p>
-                <input type="text" placeholder="Item Name" required value={newItemName} onChange={(e) => setNewItemName(e.target.value)} className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white" />
+                <p className="font-black text-sm text-[#F8CB46]">➕ Add Item with Photo</p>
+                <input type="text" placeholder="Item Name" required value={newItemName} onChange={(e) => setNewItemName(e.target.value)} className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium" />
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="number" placeholder="Price (₹)" required value={newItemPrice} onChange={(e) => setNewItemPrice(e.target.value)} className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white" />
-                  <input type="text" placeholder="Unit (500g / 1pc)" value={newItemUnit} onChange={(e) => setNewItemUnit(e.target.value)} className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white" />
+                  <input type="number" placeholder="Price (₹)" required value={newItemPrice} onChange={(e) => setNewItemPrice(e.target.value)} className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium" />
+                  <input type="text" placeholder="Unit (500g / 1pc)" value={newItemUnit} onChange={(e) => setNewItemUnit(e.target.value)} className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium" />
                 </div>
                 <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                   {PHOTO_PRESETS.map((pst, idx) => (
-                    <button key={idx} type="button" onClick={() => setNewItemImage(pst.url)} className={`px-2 py-1 rounded text-[10px] font-bold ${newItemImage === pst.url ? 'bg-orange-600 text-white' : 'bg-slate-900 text-slate-300'}`}>
+                    <button key={idx} type="button" onClick={() => setNewItemImage(pst.url)} className={`px-2 py-1 rounded text-[10px] font-bold ${newItemImage === pst.url ? 'bg-[#0C831F] text-white' : 'bg-slate-900 text-slate-300'}`}>
                       {pst.label}
                     </button>
                   ))}
                 </div>
-                <button type="submit" className="w-full py-2.5 bg-orange-600 font-bold rounded-xl text-white">Save Item</button>
+                <button type="submit" className="w-full py-2.5 bg-[#0C831F] font-bold rounded-xl text-white">Save Item</button>
               </form>
 
               <div className="space-y-2">
@@ -1363,11 +1349,11 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                       <img src={item.image} alt={item.name} className="w-10 h-10 rounded-lg object-cover" />
                       <div>
                         <p className="font-bold text-white">{item.name}</p>
-                        <p className="text-orange-400 font-bold">₹{item.price}</p>
+                        <p className="text-emerald-400 font-bold">₹{item.price}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <button onClick={() => toggleProductStock(item.id, item.in_stock)} className={`px-2.5 py-1 rounded-lg font-bold ${item.in_stock !== false ? 'bg-emerald-600' : 'bg-rose-600'}`}>
+                      <button onClick={() => toggleProductStock(item.id, item.in_stock)} className={`px-2.5 py-1 rounded-lg font-bold ${item.in_stock !== false ? 'bg-[#0C831F]' : 'bg-rose-600'}`}>
                         {item.in_stock !== false ? 'In Stock' : 'Out'}
                       </button>
                       <button onClick={() => deleteProduct(item.id)} className="px-2 py-1 rounded bg-slate-700 text-slate-300 font-bold">🗑</button>
@@ -1425,7 +1411,7 @@ ${order.items.map((it, idx) => `${idx + 1}. ${it.name} x ${it.qty} = ₹${it.pri
                       <a href={mapLink} target="_blank" rel="noreferrer" className="py-2 bg-blue-600 font-bold text-center rounded text-white flex items-center justify-center">
                         📍 Map
                       </a>
-                      <a href={`tel:${ord.customer_phone}`} className="py-2 bg-emerald-600 font-bold text-center rounded text-white flex items-center justify-center">
+                      <a href={`tel:${ord.customer_phone}`} className="py-2 bg-[#0C831F] font-bold text-center rounded text-white flex items-center justify-center">
                         📞 Call
                       </a>
                       <button onClick={() => updateOrderStatus(ord.id, 'delivered')} className="py-2 bg-emerald-500 font-bold rounded text-white flex items-center justify-center">
